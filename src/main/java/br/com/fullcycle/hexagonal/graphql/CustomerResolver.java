@@ -1,6 +1,7 @@
 package br.com.fullcycle.hexagonal.graphql;
 
 import br.com.fullcycle.hexagonal.application.usecases.CreateCustomerUseCase;
+import br.com.fullcycle.hexagonal.application.usecases.GetCustomerByIdUseCase;
 import br.com.fullcycle.hexagonal.dtos.CustomerDTO;
 import br.com.fullcycle.hexagonal.services.CustomerService;
 import org.springframework.graphql.data.method.annotation.Argument;
@@ -27,10 +28,10 @@ public class CustomerResolver {
   }
 
   @QueryMapping
-  public CustomerDTO customerOfId(@Argument final Long id) {
-    return this.customerService.findById(id)
-      .map(CustomerDTO::new)
-      .orElseThrow(() -> new RuntimeException("Customer not found"));
+  public GetCustomerByIdUseCase.Output customerOfId(@Argument final Long id) {
+    final var getCustomerByIdUseCase = new GetCustomerByIdUseCase(this.customerService);
+    return getCustomerByIdUseCase.execute(new GetCustomerByIdUseCase.Input(id))
+      .orElse(null);
   }
 
 }

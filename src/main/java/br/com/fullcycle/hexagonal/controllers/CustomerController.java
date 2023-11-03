@@ -2,6 +2,7 @@ package br.com.fullcycle.hexagonal.controllers;
 
 import br.com.fullcycle.hexagonal.application.exceptions.ValidationException;
 import br.com.fullcycle.hexagonal.application.usecases.CreateCustomerUseCase;
+import br.com.fullcycle.hexagonal.application.usecases.GetCustomerByIdUseCase;
 import br.com.fullcycle.hexagonal.dtos.CustomerDTO;
 import br.com.fullcycle.hexagonal.services.CustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,12 +37,10 @@ public class CustomerController {
 
   @GetMapping("/{id}")
   public ResponseEntity<?> get(@PathVariable final Long id) {
-    final var customer = this.customerService.findById(id);
-    if (customer.isEmpty()) {
-      return ResponseEntity.notFound().build();
-    }
-
-    return ResponseEntity.ok(customer.get());
+    final var getCustomerByIdUseCase = new GetCustomerByIdUseCase(this.customerService);
+    return getCustomerByIdUseCase.execute(new GetCustomerByIdUseCase.Input(id))
+      .map(ResponseEntity::ok)
+      .orElseGet(ResponseEntity.notFound()::build);
   }
 
 }

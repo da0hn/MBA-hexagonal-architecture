@@ -11,7 +11,7 @@ import org.mockito.Mockito;
 import java.util.Optional;
 import java.util.UUID;
 
-public class CreateCustomerUseCaseTest {
+class CreateCustomerUseCaseTest {
 
   @Test
   @DisplayName("Deve criar um cliente")
