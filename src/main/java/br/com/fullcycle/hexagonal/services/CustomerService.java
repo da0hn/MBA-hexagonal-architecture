@@ -11,24 +11,24 @@ import java.util.Optional;
 @Service
 public class CustomerService {
 
-    @Autowired
-    private CustomerRepository repository;
+  @Autowired
+  private CustomerRepository repository;
 
-    @Transactional
-    public Customer save(Customer customer) {
-        return repository.save(customer);
-    }
+  @Transactional
+  public Customer save(final Customer customer) {
+    return this.repository.save(customer);
+  }
 
-    public Optional<Customer> findById(Long id) {
-        return repository.findById(id);
-    }
+  public Optional<Customer> findById(final Long id) {
+    return this.repository.findById(id);
+  }
 
-    public Optional<Customer> findByCpf(String cpf) {
-        return repository.findByCpf(cpf);
-    }
+  public Optional<Customer> findByCpf(final String cpf) {
+    return this.repository.findByCpf(cpf);
+  }
 
-    public Optional<Customer> findByEmail(String email) {
-        return repository.findByEmail(email);
-    }
+  public Optional<Customer> findByEmail(final String email) {
+    return this.repository.findByEmail(email);
+  }
 
 }

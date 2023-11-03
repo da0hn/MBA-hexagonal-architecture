@@ -3,7 +3,10 @@ package br.com.fullcycle.hexagonal.controllers;
 import br.com.fullcycle.hexagonal.dtos.CustomerDTO;
 import br.com.fullcycle.hexagonal.repositories.CustomerRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -18,137 +21,138 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 @SpringBootTest
 public class CustomerControllerTest {
 
-    @Autowired
-    private MockMvc mvc;
+  @Autowired
+  private MockMvc mvc;
 
-    @Autowired
-    private ObjectMapper mapper;
+  @Autowired
+  private ObjectMapper mapper;
 
-    @Autowired
-    private CustomerRepository customerRepository;
+  @Autowired
+  private CustomerRepository customerRepository;
 
-    @AfterEach
-    void tearDown() {
-        customerRepository.deleteAll();
-    }
+  @Test
+  @DisplayName("Deve criar um cliente")
+  public void testCreate() throws Exception {
 
-    @Test
-    @DisplayName("Deve criar um cliente")
-    public void testCreate() throws Exception {
+    final var customer = new CustomerDTO();
+    customer.setCpf("12345678901");
+    customer.setEmail("john.doe@gmail.com");
+    customer.setName("John Doe");
 
-        var customer = new CustomerDTO();
-        customer.setCpf("12345678901");
-        customer.setEmail("john.doe@gmail.com");
-        customer.setName("John Doe");
+    final var result = this.mvc.perform(
+        MockMvcRequestBuilders.post("/customers")
+          .contentType(MediaType.APPLICATION_JSON)
+          .content(this.mapper.writeValueAsString(customer))
+      )
+      .andExpect(MockMvcResultMatchers.status().isCreated())
+      .andExpect(MockMvcResultMatchers.header().exists("Location"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.id").isNumber())
+      .andReturn().getResponse().getContentAsByteArray();
 
-        final var result = this.mvc.perform(
-                        MockMvcRequestBuilders.post("/customers")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(mapper.writeValueAsString(customer))
-                )
-                .andExpect(MockMvcResultMatchers.status().isCreated())
-                .andExpect(MockMvcResultMatchers.header().exists("Location"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.id").isNumber())
-                .andReturn().getResponse().getContentAsByteArray();
+    final var actualResponse = this.mapper.readValue(result, CustomerDTO.class);
+    Assertions.assertEquals(customer.getName(), actualResponse.getName());
+    Assertions.assertEquals(customer.getCpf(), actualResponse.getCpf());
+    Assertions.assertEquals(customer.getEmail(), actualResponse.getEmail());
+  }
 
-        var actualResponse = mapper.readValue(result, CustomerDTO.class);
-        Assertions.assertEquals(customer.getName(), actualResponse.getName());
-        Assertions.assertEquals(customer.getCpf(), actualResponse.getCpf());
-        Assertions.assertEquals(customer.getEmail(), actualResponse.getEmail());
-    }
+  @Test
+  @DisplayName("Não deve cadastrar um cliente com CPF duplicado")
+  public void testCreateWithDuplicatedCPFShouldFail() throws Exception {
 
-    @Test
-    @DisplayName("Não deve cadastrar um cliente com CPF duplicado")
-    public void testCreateWithDuplicatedCPFShouldFail() throws Exception {
+    final var customer = new CustomerDTO();
+    customer.setCpf("12345678901");
+    customer.setEmail("john.doe@gmail.com");
+    customer.setName("John Doe");
 
-        var customer = new CustomerDTO();
-        customer.setCpf("12345678901");
-        customer.setEmail("john.doe@gmail.com");
-        customer.setName("John Doe");
+    // Cria o primeiro cliente
+    this.mvc.perform(
+        MockMvcRequestBuilders.post("/customers")
+          .contentType(MediaType.APPLICATION_JSON)
+          .content(this.mapper.writeValueAsString(customer))
+      )
+      .andExpect(MockMvcResultMatchers.status().isCreated())
+      .andExpect(MockMvcResultMatchers.header().exists("Location"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.id").isNumber())
+      .andReturn().getResponse().getContentAsByteArray();
 
-        // Cria o primeiro cliente
-        this.mvc.perform(
-                        MockMvcRequestBuilders.post("/customers")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(mapper.writeValueAsString(customer))
-                )
-                .andExpect(MockMvcResultMatchers.status().isCreated())
-                .andExpect(MockMvcResultMatchers.header().exists("Location"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.id").isNumber())
-                .andReturn().getResponse().getContentAsByteArray();
+    customer.setEmail("john2@gmail.com");
 
-        customer.setEmail("john2@gmail.com");
+    // Tenta criar o segundo cliente com o mesmo CPF
+    this.mvc.perform(
+        MockMvcRequestBuilders.post("/customers")
+          .contentType(MediaType.APPLICATION_JSON)
+          .content(this.mapper.writeValueAsString(customer))
+      )
+      .andExpect(MockMvcResultMatchers.status().isUnprocessableEntity())
+      .andExpect(MockMvcResultMatchers.content().string("Customer already exists"));
+  }
 
-        // Tenta criar o segundo cliente com o mesmo CPF
-        this.mvc.perform(
-                        MockMvcRequestBuilders.post("/customers")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(mapper.writeValueAsString(customer))
-                )
-                .andExpect(MockMvcResultMatchers.status().isUnprocessableEntity())
-                .andExpect(MockMvcResultMatchers.content().string("Customer already exists"));
-    }
+  @Test
+  @DisplayName("Não deve cadastrar um cliente com e-mail duplicado")
+  public void testCreateWithDuplicatedEmailShouldFail() throws Exception {
 
-    @Test
-    @DisplayName("Não deve cadastrar um cliente com e-mail duplicado")
-    public void testCreateWithDuplicatedEmailShouldFail() throws Exception {
+    final var customer = new CustomerDTO();
+    customer.setCpf("12345618901");
+    customer.setEmail("john.doe@gmail.com");
+    customer.setName("John Doe");
 
-        var customer = new CustomerDTO();
-        customer.setCpf("12345618901");
-        customer.setEmail("john.doe@gmail.com");
-        customer.setName("John Doe");
+    // Cria o primeiro cliente
+    this.mvc.perform(
+        MockMvcRequestBuilders.post("/customers")
+          .contentType(MediaType.APPLICATION_JSON)
+          .content(this.mapper.writeValueAsString(customer))
+      )
+      .andExpect(MockMvcResultMatchers.status().isCreated())
+      .andExpect(MockMvcResultMatchers.header().exists("Location"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.id").isNumber())
+      .andReturn().getResponse().getContentAsByteArray();
 
-        // Cria o primeiro cliente
-        this.mvc.perform(
-                        MockMvcRequestBuilders.post("/customers")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(mapper.writeValueAsString(customer))
-                )
-                .andExpect(MockMvcResultMatchers.status().isCreated())
-                .andExpect(MockMvcResultMatchers.header().exists("Location"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.id").isNumber())
-                .andReturn().getResponse().getContentAsByteArray();
+    customer.setCpf("99999918901");
 
-        customer.setCpf("99999918901");
+    // Tenta criar o segundo cliente com o mesmo CPF
+    this.mvc.perform(
+        MockMvcRequestBuilders.post("/customers")
+          .contentType(MediaType.APPLICATION_JSON)
+          .content(this.mapper.writeValueAsString(customer))
+      )
+      .andExpect(MockMvcResultMatchers.status().isUnprocessableEntity())
+      .andExpect(MockMvcResultMatchers.content().string("Customer already exists"));
+  }
 
-        // Tenta criar o segundo cliente com o mesmo CPF
-        this.mvc.perform(
-                        MockMvcRequestBuilders.post("/customers")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(mapper.writeValueAsString(customer))
-                )
-                .andExpect(MockMvcResultMatchers.status().isUnprocessableEntity())
-                .andExpect(MockMvcResultMatchers.content().string("Customer already exists"));
-    }
+  @Test
+  @DisplayName("Deve obter um cliente por id")
+  public void testGet() throws Exception {
 
-    @Test
-    @DisplayName("Deve obter um cliente por id")
-    public void testGet() throws Exception {
+    final var customer = new CustomerDTO();
+    customer.setCpf("12345678901");
+    customer.setEmail("john.doe@gmail.com");
+    customer.setName("John Doe");
 
-        var customer = new CustomerDTO();
-        customer.setCpf("12345678901");
-        customer.setEmail("john.doe@gmail.com");
-        customer.setName("John Doe");
+    final var createResult = this.mvc.perform(
+        MockMvcRequestBuilders.post("/customers")
+          .contentType(MediaType.APPLICATION_JSON)
+          .content(this.mapper.writeValueAsString(customer))
+      )
+      .andReturn().getResponse().getContentAsByteArray();
 
-        final var createResult = this.mvc.perform(
-                        MockMvcRequestBuilders.post("/customers")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(mapper.writeValueAsString(customer))
-                )
-                .andReturn().getResponse().getContentAsByteArray();
+    final var customerId = this.mapper.readValue(createResult, CustomerDTO.class).getId();
 
-        var customerId = mapper.readValue(createResult, CustomerDTO.class).getId();
+    final var result = this.mvc.perform(
+        MockMvcRequestBuilders.get("/customers/{id}", customerId)
+      )
+      .andExpect(MockMvcResultMatchers.status().isOk())
+      .andReturn().getResponse().getContentAsByteArray();
 
-        final var result = this.mvc.perform(
-                        MockMvcRequestBuilders.get("/customers/{id}", customerId)
-                )
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andReturn().getResponse().getContentAsByteArray();
+    final var actualResponse = this.mapper.readValue(result, CustomerDTO.class);
+    Assertions.assertEquals(customerId, actualResponse.getId());
+    Assertions.assertEquals(customer.getName(), actualResponse.getName());
+    Assertions.assertEquals(customer.getCpf(), actualResponse.getCpf());
+    Assertions.assertEquals(customer.getEmail(), actualResponse.getEmail());
+  }
 
-        var actualResponse = mapper.readValue(result, CustomerDTO.class);
-        Assertions.assertEquals(customerId, actualResponse.getId());
-        Assertions.assertEquals(customer.getName(), actualResponse.getName());
-        Assertions.assertEquals(customer.getCpf(), actualResponse.getCpf());
-        Assertions.assertEquals(customer.getEmail(), actualResponse.getEmail());
-    }
+  @AfterEach
+  void tearDown() {
+    this.customerRepository.deleteAll();
+  }
+
 }

@@ -3,50 +3,55 @@ package br.com.fullcycle.hexagonal.dtos;
 import br.com.fullcycle.hexagonal.models.Customer;
 
 public class CustomerDTO {
-    private Long id;
-    private String name;
-    private String cpf;
-    private String email;
 
-    public CustomerDTO() {
-    }
+  private Long id;
 
-    public CustomerDTO(Customer customer) {
-        this.id = customer.getId();
-        this.name = customer.getName();
-        this.cpf = customer.getCpf();
-        this.email = customer.getEmail();
-    }
+  private String name;
 
-    public Long getId() {
-        return id;
-    }
+  private String cpf;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+  private String email;
 
-    public String getName() {
-        return name;
-    }
+  public CustomerDTO() {
+  }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+  public CustomerDTO(final Customer customer) {
+    this.id = customer.getId();
+    this.name = customer.getName();
+    this.cpf = customer.getCpf();
+    this.email = customer.getEmail();
+  }
 
-    public String getCpf() {
-        return cpf;
-    }
+  public Long getId() {
+    return this.id;
+  }
 
-    public void setCpf(String cpf) {
-        this.cpf = cpf;
-    }
+  public void setId(final Long id) {
+    this.id = id;
+  }
 
-    public String getEmail() {
-        return email;
-    }
+  public String getName() {
+    return this.name;
+  }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
+  public void setName(final String name) {
+    this.name = name;
+  }
+
+  public String getCpf() {
+    return this.cpf;
+  }
+
+  public void setCpf(final String cpf) {
+    this.cpf = cpf;
+  }
+
+  public String getEmail() {
+    return this.email;
+  }
+
+  public void setEmail(final String email) {
+    this.email = email;
+  }
+
 }

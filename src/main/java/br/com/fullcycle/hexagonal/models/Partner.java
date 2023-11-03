@@ -11,55 +11,56 @@ import static jakarta.persistence.GenerationType.IDENTITY;
 @Table(name = "partners")
 public class Partner {
 
-    @Id
-    @GeneratedValue(strategy = IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = IDENTITY)
+  private Long id;
 
-    private String name;
+  private String name;
 
-    private String cnpj;
+  private String cnpj;
 
-    private String email;
+  private String email;
 
-    public Partner() {
-    }
+  public Partner() {
+  }
 
-    public Partner(Long id, String name, String cnpj, String email) {
-        this.id = id;
-        this.name = name;
-        this.cnpj = cnpj;
-        this.email = email;
-    }
+  public Partner(final Long id, final String name, final String cnpj, final String email) {
+    this.id = id;
+    this.name = name;
+    this.cnpj = cnpj;
+    this.email = email;
+  }
 
-    public Long getId() {
-        return id;
-    }
+  public Long getId() {
+    return this.id;
+  }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+  public void setId(final Long id) {
+    this.id = id;
+  }
 
-    public String getName() {
-        return name;
-    }
+  public String getName() {
+    return this.name;
+  }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+  public void setName(final String name) {
+    this.name = name;
+  }
 
-    public String getCnpj() {
-        return cnpj;
-    }
+  public String getCnpj() {
+    return this.cnpj;
+  }
 
-    public void setCnpj(String cnpj) {
-        this.cnpj = cnpj;
-    }
+  public void setCnpj(final String cnpj) {
+    this.cnpj = cnpj;
+  }
 
-    public String getEmail() {
-        return email;
-    }
+  public String getEmail() {
+    return this.email;
+  }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
+  public void setEmail(final String email) {
+    this.email = email;
+  }
+
 }

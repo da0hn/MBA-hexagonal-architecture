@@ -6,61 +6,65 @@ import java.time.format.DateTimeFormatter;
 
 public class EventDTO {
 
-    private Long id;
-    private String name;
-    private String date;
-    private int totalSpots;
-    private PartnerDTO partner;
+  private Long id;
 
-    public EventDTO() {
-    }
+  private String name;
 
-    public EventDTO(Event event) {
-        this.id = event.getId();
-        this.name = event.getName();
-        this.date = event.getDate().format(DateTimeFormatter.ISO_DATE);
-        this.totalSpots = event.getTotalSpots();
-        this.partner = new PartnerDTO(event.getPartner());
-    }
+  private String date;
 
-    public Long getId() {
-        return id;
-    }
+  private int totalSpots;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+  private PartnerDTO partner;
 
-    public String getName() {
-        return name;
-    }
+  public EventDTO() {
+  }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+  public EventDTO(final Event event) {
+    this.id = event.getId();
+    this.name = event.getName();
+    this.date = event.getDate().format(DateTimeFormatter.ISO_DATE);
+    this.totalSpots = event.getTotalSpots();
+    this.partner = new PartnerDTO(event.getPartner());
+  }
 
-    public String getDate() {
-        return date;
-    }
+  public Long getId() {
+    return this.id;
+  }
 
-    public void setDate(String date) {
-        this.date = date;
-    }
+  public void setId(final Long id) {
+    this.id = id;
+  }
 
-    public int getTotalSpots() {
-        return totalSpots;
-    }
+  public String getName() {
+    return this.name;
+  }
 
-    public void setTotalSpots(int totalSpots) {
-        this.totalSpots = totalSpots;
-    }
+  public void setName(final String name) {
+    this.name = name;
+  }
 
-    public PartnerDTO getPartner() {
-        return partner;
-    }
+  public String getDate() {
+    return this.date;
+  }
 
-    public void setPartner(PartnerDTO partner) {
-        this.partner = partner;
-    }
+  public void setDate(final String date) {
+    this.date = date;
+  }
+
+  public int getTotalSpots() {
+    return this.totalSpots;
+  }
+
+  public void setTotalSpots(final int totalSpots) {
+    this.totalSpots = totalSpots;
+  }
+
+  public PartnerDTO getPartner() {
+    return this.partner;
+  }
+
+  public void setPartner(final PartnerDTO partner) {
+    this.partner = partner;
+  }
 
 }

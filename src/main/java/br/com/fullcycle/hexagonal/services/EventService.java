@@ -13,25 +13,26 @@ import java.util.Optional;
 @Service
 public class EventService {
 
-    @Autowired
-    private CustomerService customerService;
+  @Autowired
+  private CustomerService customerService;
 
-    @Autowired
-    private EventRepository eventRepository;
+  @Autowired
+  private EventRepository eventRepository;
 
-    @Autowired
-    private TicketRepository ticketRepository;
+  @Autowired
+  private TicketRepository ticketRepository;
 
-    @Transactional
-    public Event save(Event event) {
-        return eventRepository.save(event);
-    }
+  @Transactional
+  public Event save(final Event event) {
+    return this.eventRepository.save(event);
+  }
 
-    public Optional<Event> findById(Long id) {
-        return eventRepository.findById(id);
-    }
-    
-    public Optional<Ticket> findTicketByEventIdAndCustomerId(Long id, Long customerId) {
-        return ticketRepository.findByEventIdAndCustomerId(id, customerId);
-    }
+  public Optional<Event> findById(final Long id) {
+    return this.eventRepository.findById(id);
+  }
+
+  public Optional<Ticket> findTicketByEventIdAndCustomerId(final Long id, final Long customerId) {
+    return this.ticketRepository.findByEventIdAndCustomerId(id, customerId);
+  }
+
 }
