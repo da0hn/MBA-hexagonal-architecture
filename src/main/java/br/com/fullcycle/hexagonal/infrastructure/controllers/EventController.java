@@ -4,10 +4,6 @@ import br.com.fullcycle.hexagonal.application.usecases.CreateEventUseCase;
 import br.com.fullcycle.hexagonal.application.usecases.SubscribeCustomerToEventUseCase;
 import br.com.fullcycle.hexagonal.infrastructure.dtos.EventDTO;
 import br.com.fullcycle.hexagonal.infrastructure.dtos.SubscribeDTO;
-import br.com.fullcycle.hexagonal.infrastructure.services.CustomerService;
-import br.com.fullcycle.hexagonal.infrastructure.services.EventService;
-import br.com.fullcycle.hexagonal.infrastructure.services.PartnerService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,24 +16,26 @@ import java.net.URI;
 import java.util.Objects;
 
 @RestController
-@RequestMapping(value = "events")
+@RequestMapping("/events")
 public class EventController {
 
-  @Autowired
-  private CustomerService customerService;
+  private final CreateEventUseCase createEventUseCase;
 
-  @Autowired
-  private EventService eventService;
+  private final SubscribeCustomerToEventUseCase subscribeCustomerToEventUseCase;
 
-  @Autowired
-  private PartnerService partnerService;
+  public EventController(
+    final CreateEventUseCase createEventUseCase,
+    final SubscribeCustomerToEventUseCase subscribeCustomerToEventUseCase
+  ) {
+    this.createEventUseCase = createEventUseCase;
+    this.subscribeCustomerToEventUseCase = subscribeCustomerToEventUseCase;
+  }
 
   @PostMapping
   public ResponseEntity<?> create(@RequestBody final EventDTO dto) {
     try {
       final var partnerId = Objects.requireNonNull(dto.getPartner(), "Partner is required").getId();
-      final var createEventUseCase = new CreateEventUseCase(this.eventService, this.partnerService);
-      final var output = createEventUseCase.execute(new CreateEventUseCase.Input(
+      final var output = this.createEventUseCase.execute(new CreateEventUseCase.Input(
         dto.getDate(),
         dto.getName(),
         partnerId,
@@ -54,8 +52,7 @@ public class EventController {
   @PostMapping(value = "/{id}/subscribe")
   public ResponseEntity<?> subscribe(@PathVariable final Long id, @RequestBody final SubscribeDTO dto) {
     try {
-      final var subscribeCustomerToEventUseCase = new SubscribeCustomerToEventUseCase(this.eventService, this.customerService);
-      final var output = subscribeCustomerToEventUseCase.execute(new SubscribeCustomerToEventUseCase.Input(
+      final var output = this.subscribeCustomerToEventUseCase.execute(new SubscribeCustomerToEventUseCase.Input(
         id,
         dto.getCustomerId()
       ));

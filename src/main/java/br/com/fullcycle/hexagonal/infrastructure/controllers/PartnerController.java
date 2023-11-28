@@ -4,8 +4,6 @@ import br.com.fullcycle.hexagonal.application.exceptions.ValidationException;
 import br.com.fullcycle.hexagonal.application.usecases.CreatePartnerUseCase;
 import br.com.fullcycle.hexagonal.application.usecases.GetPartnerByIdUseCase;
 import br.com.fullcycle.hexagonal.infrastructure.dtos.PartnerDTO;
-import br.com.fullcycle.hexagonal.infrastructure.services.PartnerService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,17 +15,29 @@ import org.springframework.web.bind.annotation.RestController;
 import java.net.URI;
 
 @RestController
-@RequestMapping(value = "partners")
+@RequestMapping("/partners")
 public class PartnerController {
 
-  @Autowired
-  private PartnerService partnerService;
+  private final CreatePartnerUseCase createPartnerUseCase;
+
+  private final GetPartnerByIdUseCase getPartnerByIdUseCase;
+
+  public PartnerController(
+    final CreatePartnerUseCase createPartnerUseCase,
+    final GetPartnerByIdUseCase getPartnerByIdUseCase
+  ) {
+    this.createPartnerUseCase = createPartnerUseCase;
+    this.getPartnerByIdUseCase = getPartnerByIdUseCase;
+  }
 
   @PostMapping
   public ResponseEntity<?> create(@RequestBody final PartnerDTO dto) {
     try {
-      final var createPartnerUseCase = new CreatePartnerUseCase(this.partnerService);
-      final var output = createPartnerUseCase.execute(new CreatePartnerUseCase.Input(dto.getCnpj(), dto.getEmail(), dto.getName()));
+      final var output = this.createPartnerUseCase.execute(new CreatePartnerUseCase.Input(
+        dto.getCnpj(),
+        dto.getEmail(),
+        dto.getName()
+      ));
       return ResponseEntity.created(URI.create("/partners/" + output.id())).body(output);
     }
     catch (final ValidationException e) {
@@ -37,8 +47,7 @@ public class PartnerController {
 
   @GetMapping("/{id}")
   public ResponseEntity<?> get(@PathVariable final Long id) {
-    final var getPartnerByIdUseCase = new GetPartnerByIdUseCase(this.partnerService);
-    return getPartnerByIdUseCase.execute(new GetPartnerByIdUseCase.Input(id))
+    return this.getPartnerByIdUseCase.execute(new GetPartnerByIdUseCase.Input(id))
       .map(ResponseEntity::ok)
       .orElseGet(ResponseEntity.notFound()::build);
   }
