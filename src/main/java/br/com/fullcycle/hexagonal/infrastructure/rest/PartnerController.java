@@ -1,4 +1,4 @@
-package br.com.fullcycle.hexagonal.infrastructure.controllers;
+package br.com.fullcycle.hexagonal.infrastructure.rest;
 
 import br.com.fullcycle.hexagonal.application.exceptions.ValidationException;
 import br.com.fullcycle.hexagonal.application.usecases.CreatePartnerUseCase;

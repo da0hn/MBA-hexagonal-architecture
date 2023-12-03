@@ -1,4 +1,4 @@
-package br.com.fullcycle.hexagonal.infrastructure.controllers;
+package br.com.fullcycle.hexagonal.infrastructure.rest;
 
 import br.com.fullcycle.hexagonal.infrastructure.dtos.PartnerDTO;
 import br.com.fullcycle.hexagonal.infrastructure.repositories.PartnerRepository;

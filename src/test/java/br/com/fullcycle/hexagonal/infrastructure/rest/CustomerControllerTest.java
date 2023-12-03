@@ -1,6 +1,8 @@
-package br.com.fullcycle.hexagonal.infrastructure.controllers;
+package br.com.fullcycle.hexagonal.infrastructure.rest;
 
-import br.com.fullcycle.hexagonal.infrastructure.dtos.CustomerDTO;
+import br.com.fullcycle.hexagonal.application.usecases.CreateCustomerUseCase;
+import br.com.fullcycle.hexagonal.application.usecases.GetCustomerByIdUseCase;
+import br.com.fullcycle.hexagonal.infrastructure.dtos.NewCustomerDTO;
 import br.com.fullcycle.hexagonal.infrastructure.repositories.CustomerRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
@@ -34,10 +36,7 @@ public class CustomerControllerTest {
   @DisplayName("Deve criar um cliente")
   public void testCreate() throws Exception {
 
-    final var customer = new CustomerDTO();
-    customer.setCpf("12345678901");
-    customer.setEmail("john.doe@gmail.com");
-    customer.setName("John Doe");
+    final var customer = new NewCustomerDTO("John Doe", "12345678901", "john.doe@gmail.com");
 
     final var result = this.mvc.perform(
         MockMvcRequestBuilders.post("/customers")
@@ -49,20 +48,17 @@ public class CustomerControllerTest {
       .andExpect(MockMvcResultMatchers.jsonPath("$.id").isNumber())
       .andReturn().getResponse().getContentAsByteArray();
 
-    final var actualResponse = this.mapper.readValue(result, CustomerDTO.class);
-    Assertions.assertEquals(customer.getName(), actualResponse.getName());
-    Assertions.assertEquals(customer.getCpf(), actualResponse.getCpf());
-    Assertions.assertEquals(customer.getEmail(), actualResponse.getEmail());
+    final var actualResponse = this.mapper.readValue(result, NewCustomerDTO.class);
+    Assertions.assertEquals(customer.name(), actualResponse.name());
+    Assertions.assertEquals(customer.cpf(), actualResponse.cpf());
+    Assertions.assertEquals(customer.email(), actualResponse.email());
   }
 
   @Test
   @DisplayName("Não deve cadastrar um cliente com CPF duplicado")
   public void testCreateWithDuplicatedCPFShouldFail() throws Exception {
 
-    final var customer = new CustomerDTO();
-    customer.setCpf("12345678901");
-    customer.setEmail("john.doe@gmail.com");
-    customer.setName("John Doe");
+    final var customer = new NewCustomerDTO("John Doe", "12345678901", "john.doe@gmail.com");
 
     // Cria o primeiro cliente
     this.mvc.perform(
@@ -75,13 +71,13 @@ public class CustomerControllerTest {
       .andExpect(MockMvcResultMatchers.jsonPath("$.id").isNumber())
       .andReturn().getResponse().getContentAsByteArray();
 
-    customer.setEmail("john2@gmail.com");
+    final var otherCustomer = new NewCustomerDTO("John Doe", "12345678901", "john2@gmail.com");
 
     // Tenta criar o segundo cliente com o mesmo CPF
     this.mvc.perform(
         MockMvcRequestBuilders.post("/customers")
           .contentType(MediaType.APPLICATION_JSON)
-          .content(this.mapper.writeValueAsString(customer))
+          .content(this.mapper.writeValueAsString(otherCustomer))
       )
       .andExpect(MockMvcResultMatchers.status().isUnprocessableEntity())
       .andExpect(MockMvcResultMatchers.content().string("Customer already exists"));
@@ -91,10 +87,7 @@ public class CustomerControllerTest {
   @DisplayName("Não deve cadastrar um cliente com e-mail duplicado")
   public void testCreateWithDuplicatedEmailShouldFail() throws Exception {
 
-    final var customer = new CustomerDTO();
-    customer.setCpf("12345618901");
-    customer.setEmail("john.doe@gmail.com");
-    customer.setName("John Doe");
+    final var customer = new NewCustomerDTO("John Doe", "12345678901", "john.doe@gmail.com");
 
     // Cria o primeiro cliente
     this.mvc.perform(
@@ -107,13 +100,13 @@ public class CustomerControllerTest {
       .andExpect(MockMvcResultMatchers.jsonPath("$.id").isNumber())
       .andReturn().getResponse().getContentAsByteArray();
 
-    customer.setCpf("99999918901");
+    final var otherCustomer = new NewCustomerDTO("John Doe", "99999918901", "john.doe@gmail.com");
 
     // Tenta criar o segundo cliente com o mesmo CPF
     this.mvc.perform(
         MockMvcRequestBuilders.post("/customers")
           .contentType(MediaType.APPLICATION_JSON)
-          .content(this.mapper.writeValueAsString(customer))
+          .content(this.mapper.writeValueAsString(otherCustomer))
       )
       .andExpect(MockMvcResultMatchers.status().isUnprocessableEntity())
       .andExpect(MockMvcResultMatchers.content().string("Customer already exists"));
@@ -123,10 +116,7 @@ public class CustomerControllerTest {
   @DisplayName("Deve obter um cliente por id")
   public void testGet() throws Exception {
 
-    final var customer = new CustomerDTO();
-    customer.setCpf("12345678901");
-    customer.setEmail("john.doe@gmail.com");
-    customer.setName("John Doe");
+    final var customer = new NewCustomerDTO("John Doe", "12345678901", "john.doe@gmail.com");
 
     final var createResult = this.mvc.perform(
         MockMvcRequestBuilders.post("/customers")
@@ -135,7 +125,7 @@ public class CustomerControllerTest {
       )
       .andReturn().getResponse().getContentAsByteArray();
 
-    final var customerId = this.mapper.readValue(createResult, CustomerDTO.class).getId();
+    final var customerId = this.mapper.readValue(createResult, CreateCustomerUseCase.Output.class).id();
 
     final var result = this.mvc.perform(
         MockMvcRequestBuilders.get("/customers/{id}", customerId)
@@ -143,11 +133,11 @@ public class CustomerControllerTest {
       .andExpect(MockMvcResultMatchers.status().isOk())
       .andReturn().getResponse().getContentAsByteArray();
 
-    final var actualResponse = this.mapper.readValue(result, CustomerDTO.class);
-    Assertions.assertEquals(customerId, actualResponse.getId());
-    Assertions.assertEquals(customer.getName(), actualResponse.getName());
-    Assertions.assertEquals(customer.getCpf(), actualResponse.getCpf());
-    Assertions.assertEquals(customer.getEmail(), actualResponse.getEmail());
+    final var actualResponse = this.mapper.readValue(result, GetCustomerByIdUseCase.Output.class);
+    Assertions.assertEquals(customerId, actualResponse.id());
+    Assertions.assertEquals(customer.name(), actualResponse.name());
+    Assertions.assertEquals(customer.cpf(), actualResponse.cpf());
+    Assertions.assertEquals(customer.email(), actualResponse.email());
   }
 
   @AfterEach

@@ -1,8 +1,8 @@
-package br.com.fullcycle.hexagonal.infrastructure.controllers;
+package br.com.fullcycle.hexagonal.infrastructure.rest;
 
 import br.com.fullcycle.hexagonal.application.usecases.CreateEventUseCase;
 import br.com.fullcycle.hexagonal.application.usecases.SubscribeCustomerToEventUseCase;
-import br.com.fullcycle.hexagonal.infrastructure.dtos.EventDTO;
+import br.com.fullcycle.hexagonal.infrastructure.dtos.NewEventDTO;
 import br.com.fullcycle.hexagonal.infrastructure.dtos.SubscribeDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.net.URI;
-import java.util.Objects;
 
 @RestController
 @RequestMapping("/events")
@@ -32,14 +31,13 @@ public class EventController {
   }
 
   @PostMapping
-  public ResponseEntity<?> create(@RequestBody final EventDTO dto) {
+  public ResponseEntity<?> create(@RequestBody final NewEventDTO dto) {
     try {
-      final var partnerId = Objects.requireNonNull(dto.getPartner(), "Partner is required").getId();
       final var output = this.createEventUseCase.execute(new CreateEventUseCase.Input(
-        dto.getDate(),
-        dto.getName(),
-        partnerId,
-        dto.getTotalSpots()
+        dto.date(),
+        dto.name(),
+        dto.partnerId(),
+        dto.totalSpots()
       ));
       return ResponseEntity.created(URI.create("/events/" + output.id())).body(output);
     }
@@ -54,7 +52,7 @@ public class EventController {
     try {
       final var output = this.subscribeCustomerToEventUseCase.execute(new SubscribeCustomerToEventUseCase.Input(
         id,
-        dto.getCustomerId()
+        dto.customerId()
       ));
       return ResponseEntity.ok(output);
     }
