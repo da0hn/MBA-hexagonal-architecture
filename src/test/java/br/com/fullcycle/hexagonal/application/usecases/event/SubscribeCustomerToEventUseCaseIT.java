@@ -1,11 +1,11 @@
 package br.com.fullcycle.hexagonal.application.usecases.event;
 
 import br.com.fullcycle.hexagonal.IntegrationTest;
+import br.com.fullcycle.hexagonal.application.domain.ticket.TicketStatus;
 import br.com.fullcycle.hexagonal.application.exceptions.ValidationException;
 import br.com.fullcycle.hexagonal.infrastructure.jpa.entities.CustomerEntity;
 import br.com.fullcycle.hexagonal.infrastructure.jpa.entities.EventEntity;
 import br.com.fullcycle.hexagonal.infrastructure.jpa.entities.TicketEntity;
-import br.com.fullcycle.hexagonal.application.domain.ticket.TicketStatus;
 import br.com.fullcycle.hexagonal.infrastructure.jpa.repositories.CustomerJpaRepository;
 import br.com.fullcycle.hexagonal.infrastructure.jpa.repositories.EventJpaRepository;
 import br.com.fullcycle.hexagonal.infrastructure.jpa.repositories.TicketJpaRepository;
@@ -34,12 +34,17 @@ class SubscribeCustomerToEventUseCaseIT extends IntegrationTest {
   @Autowired
   private TicketJpaRepository ticketRepository;
 
-  private EventEntity createEvent(final String eventName, final LocalDate date, final int totalSpots, final HashSet<TicketEntity> tickets) {
+  private EventEntity createEvent(
+    final String eventName,
+    final LocalDate date,
+    final int totalSpots,
+    final HashSet<TicketEntity> tickets
+  ) {
     final var event = new EventEntity();
     event.setName(eventName);
     event.setDate(date);
     event.setTotalSpots(totalSpots);
-    event.setTickets(tickets);
+    event.setTickets(null);
     return this.eventRepository.save(event);
   }
 
@@ -121,8 +126,8 @@ class SubscribeCustomerToEventUseCaseIT extends IntegrationTest {
     final UUID eventId = event.getId();
 
     final var ticket = new TicketEntity();
-    ticket.setCustomer(customer);
-    ticket.setEvent(event);
+    ticket.setCustomerId(customerId);
+    ticket.setEventId(eventId);
     ticket.setReservedAt(Instant.now());
     ticket.setStatus(TicketStatus.PENDING);
 
@@ -149,12 +154,12 @@ class SubscribeCustomerToEventUseCaseIT extends IntegrationTest {
     final UUID eventId = event.getId();
 
     final var ticket = new TicketEntity();
-    ticket.setCustomer(otherCustomer);
-    ticket.setEvent(event);
+    ticket.setCustomerId(otherCustomer.getId());
+    ticket.setEventId(event.getId());
     ticket.setReservedAt(Instant.now());
     ticket.setStatus(TicketStatus.PENDING);
 
-    event.getTickets().add(ticket);
+//    event.getTickets().add(ticket);
     this.ticketRepository.save(ticket);
     this.eventRepository.save(event);
 

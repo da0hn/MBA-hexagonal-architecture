@@ -11,7 +11,7 @@ import jakarta.persistence.Table;
 
 import java.util.UUID;
 
-@Entity
+@Entity(name = "Partner")
 @Table(name = "partners")
 public class PartnerEntity {
 

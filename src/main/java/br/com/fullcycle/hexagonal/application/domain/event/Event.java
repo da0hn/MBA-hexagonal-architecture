@@ -10,8 +10,10 @@ import br.com.fullcycle.hexagonal.application.exceptions.ValidationException;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class Event {
@@ -28,17 +30,24 @@ public class Event {
 
   private PartnerId partnerId;
 
-  public Event(final EventId eventId, final Name name, final LocalDate date, final Integer totalSpots, final PartnerId partnerId) {
-    this(eventId);
+  public Event(
+    final EventId eventId,
+    final Name name,
+    final LocalDate date,
+    final Integer totalSpots,
+    final PartnerId partnerId,
+    final Collection<EventTicket> tickets
+  ) {
+    this(eventId, tickets);
     this.name = Entities.requireNonNull(name, "Event name must not be null");
     this.date = Entities.requireNonNull(date, "Event date must not be null");
     this.totalSpots = Entities.requireNonNull(totalSpots, "Event total spots must not be null");
     this.partnerId = Entities.requireNonNull(partnerId, "Event partner id must not be null");
   }
 
-  private Event(final EventId eventId) {
+  private Event(final EventId eventId, final Collection<EventTicket> tickets) {
     this.eventId = Entities.requireNonNull(eventId, "Event id must not be null");
-    this.tickets = new HashSet<>(0);
+    this.tickets = tickets == null ? new HashSet<>(0) : new HashSet<>(tickets);
   }
 
   public static Event newEvent(final String name, final CharSequence date, final Integer totalSpots, final Partner partner) {
@@ -49,7 +58,26 @@ public class Event {
       new Name(name),
       LocalDate.parse(date, DateTimeFormatter.ISO_DATE),
       totalSpots,
-      partner.partnerId()
+      partner.partnerId(),
+      null
+    );
+  }
+
+  public static Event restore(
+    final String eventId,
+    final String name,
+    final LocalDate date,
+    final int totalSpots,
+    final String partnerId,
+    final List<EventTicket> tickets
+  ) {
+    return new Event(
+      EventId.with(eventId),
+      new Name(name),
+      date,
+      totalSpots,
+      PartnerId.with(partnerId),
+      tickets
     );
   }
 

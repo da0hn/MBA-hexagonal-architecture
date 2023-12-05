@@ -7,10 +7,10 @@ import java.util.Optional;
 
 public interface TicketRepository {
 
-  Optional<Ticket> ticketOfId(TicketId eventId);
+  Optional<Ticket> ticketOfId(TicketId ticketId);
 
-  Ticket create(Ticket event);
+  Ticket create(Ticket ticket);
 
-  Ticket update(Ticket event);
+  Ticket update(Ticket ticket);
 
 }

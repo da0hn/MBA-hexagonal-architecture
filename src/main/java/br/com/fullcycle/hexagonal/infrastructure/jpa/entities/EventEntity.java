@@ -1,10 +1,11 @@
 package br.com.fullcycle.hexagonal.infrastructure.jpa.entities;
 
+import br.com.fullcycle.hexagonal.application.domain.event.Event;
+import br.com.fullcycle.hexagonal.application.domain.event.EventTicket;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
@@ -14,7 +15,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
-@Entity
+@Entity(name = "Event")
 @Table(name = "events")
 public class EventEntity {
 
@@ -27,22 +28,45 @@ public class EventEntity {
 
   private int totalSpots;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  private PartnerEntity partner;
+  private UUID partnerId;
 
   @OneToMany(cascade = CascadeType.ALL, mappedBy = "event", fetch = FetchType.EAGER)
-  private Set<TicketEntity> tickets;
+  private Set<EventTicketEntity> tickets;
 
   public EventEntity() {
     this.tickets = new HashSet<>();
   }
 
-  public EventEntity(final UUID id, final String name, final LocalDate date, final int totalSpots, final Set<TicketEntity> tickets) {
+  public EventEntity(
+    final UUID id,
+    final String name,
+    final LocalDate date,
+    final int totalSpots,
+    final UUID partnerId
+  ) {
     this.id = id;
     this.name = name;
     this.date = date;
     this.totalSpots = totalSpots;
-    this.tickets = tickets != null ? tickets : new HashSet<>();
+    this.partnerId = partnerId;
+  }
+
+  public static EventEntity of(final Event event) {
+    final var instance = new EventEntity(
+      event.eventId().value(),
+      event.name().value(),
+      event.date(),
+      event.totalSpots(),
+      event.partnerId().value()
+    );
+
+    event.tickets().forEach(instance::addTicket);
+
+    return instance;
+  }
+
+  public void addTicket(final EventTicket eventTicket) {
+    this.tickets.add(EventTicketEntity.of(this, eventTicket));
   }
 
   public UUID getId() {
@@ -77,19 +101,19 @@ public class EventEntity {
     this.totalSpots = totalSpots;
   }
 
-  public PartnerEntity getPartner() {
-    return this.partner;
+  public UUID getPartnerId() {
+    return this.partnerId;
   }
 
-  public void setPartner(final PartnerEntity partner) {
-    this.partner = partner;
+  public void setPartnerId(final UUID partnerId) {
+    this.partnerId = partnerId;
   }
 
-  public Set<TicketEntity> getTickets() {
+  public Set<EventTicketEntity> getTickets() {
     return this.tickets;
   }
 
-  public void setTickets(final Set<TicketEntity> tickets) {
+  public void setTickets(final Set<EventTicketEntity> tickets) {
     this.tickets = tickets;
   }
 
@@ -104,6 +128,17 @@ public class EventEntity {
     if (o == null || this.getClass() != o.getClass()) return false;
     final EventEntity event = (EventEntity) o;
     return Objects.equals(this.id, event.id);
+  }
+
+  public Event toEvent() {
+    return Event.restore(
+      this.id.toString(),
+      this.name,
+      this.date,
+      this.totalSpots,
+      this.partnerId.toString(),
+      this.tickets.stream().map(EventTicketEntity::toEventTicket).toList()
+    );
   }
 
 }

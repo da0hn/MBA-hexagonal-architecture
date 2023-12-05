@@ -1,30 +1,29 @@
 package br.com.fullcycle.hexagonal.infrastructure.jpa.entities;
 
+import br.com.fullcycle.hexagonal.application.domain.customer.CustomerId;
+import br.com.fullcycle.hexagonal.application.domain.event.EventId;
+import br.com.fullcycle.hexagonal.application.domain.ticket.Ticket;
+import br.com.fullcycle.hexagonal.application.domain.ticket.TicketId;
 import br.com.fullcycle.hexagonal.application.domain.ticket.TicketStatus;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 import java.time.Instant;
-import java.util.Objects;
 import java.util.UUID;
 
-@Entity
+@Entity(name = "Ticket")
 @Table(name = "tickets")
 public class TicketEntity {
 
   @Id
   private UUID id;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  private CustomerEntity customer;
+  private UUID customerId;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  private EventEntity event;
+  private UUID eventId;
 
   @Enumerated(EnumType.STRING)
   private TicketStatus status;
@@ -38,18 +37,29 @@ public class TicketEntity {
 
   public TicketEntity(
     final UUID id,
-    final CustomerEntity customer,
-    final EventEntity event,
+    final UUID customerId,
+    final UUID eventId,
     final TicketStatus status,
     final Instant paidAt,
     final Instant reservedAt
   ) {
     this.id = id;
-    this.customer = customer;
-    this.event = event;
+    this.customerId = customerId;
+    this.eventId = eventId;
     this.status = status;
     this.paidAt = paidAt;
     this.reservedAt = reservedAt;
+  }
+
+  public static TicketEntity of(final Ticket ticket) {
+    return new TicketEntity(
+      ticket.ticketId().value(),
+      ticket.customerId().value(),
+      ticket.eventId().value(),
+      ticket.status(),
+      ticket.paidAt(),
+      ticket.reservedAt()
+    );
   }
 
   public UUID getId() {
@@ -60,20 +70,20 @@ public class TicketEntity {
     this.id = id;
   }
 
-  public CustomerEntity getCustomer() {
-    return this.customer;
+  public UUID getCustomerId() {
+    return this.customerId;
   }
 
-  public void setCustomer(final CustomerEntity customer) {
-    this.customer = customer;
+  public void setCustomerId(final UUID customerId) {
+    this.customerId = customerId;
   }
 
-  public EventEntity getEvent() {
-    return this.event;
+  public UUID getEventId() {
+    return this.eventId;
   }
 
-  public void setEvent(final EventEntity event) {
-    this.event = event;
+  public void setEventId(final UUID eventId) {
+    this.eventId = eventId;
   }
 
   public TicketStatus getStatus() {
@@ -102,15 +112,26 @@ public class TicketEntity {
 
   @Override
   public int hashCode() {
-    return Objects.hash(this.customer, this.event);
+    return this.id.hashCode();
   }
 
   @Override
   public boolean equals(final Object o) {
     if (this == o) return true;
-    if (o == null || this.getClass() != o.getClass()) return false;
-    final TicketEntity ticket = (TicketEntity) o;
-    return Objects.equals(this.customer, ticket.customer) && Objects.equals(this.event, ticket.event);
+    if (!(o instanceof final TicketEntity that)) return false;
+
+    return this.id.equals(that.id);
+  }
+
+  public Ticket toTicket() {
+    return new Ticket(
+      new TicketId(this.id),
+      new CustomerId(this.customerId),
+      new EventId(this.eventId),
+      this.status,
+      this.paidAt,
+      this.reservedAt
+    );
   }
 
 }

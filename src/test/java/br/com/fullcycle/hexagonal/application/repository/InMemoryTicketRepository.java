@@ -17,20 +17,20 @@ public class InMemoryTicketRepository implements TicketRepository {
   }
 
   @Override
-  public Optional<Ticket> ticketOfId(final TicketId eventId) {
-    return Optional.ofNullable(this.tickets.getOrDefault(eventId.asString(), null));
+  public Optional<Ticket> ticketOfId(final TicketId ticketId) {
+    return Optional.ofNullable(this.tickets.getOrDefault(ticketId.asString(), null));
   }
 
   @Override
-  public Ticket create(final Ticket event) {
-    this.tickets.put(event.eventId().asString(), event);
-    return event;
+  public Ticket create(final Ticket ticket) {
+    this.tickets.put(ticket.eventId().asString(), ticket);
+    return ticket;
   }
 
   @Override
-  public Ticket update(final Ticket event) {
-    this.tickets.put(event.eventId().asString(), event);
-    return event;
+  public Ticket update(final Ticket ticket) {
+    this.tickets.put(ticket.eventId().asString(), ticket);
+    return ticket;
   }
 
 }

@@ -14,7 +14,7 @@ public class EventTicket {
 
   private final int ordering;
 
-  protected EventTicket(final TicketId ticketId, final EventId eventId, final CustomerId customerId, final Integer ordering) {
+  public EventTicket(final TicketId ticketId, final EventId eventId, final CustomerId customerId, final Integer ordering) {
     this.ticketId = Entities.requireNonNull(ticketId, "Ticket id cannot be null");
     this.eventId = Entities.requireNonNull(eventId, "Event id cannot be null");
     this.customerId = Entities.requireNonNull(customerId, "Customer id cannot be null");
