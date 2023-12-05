@@ -1,18 +1,16 @@
 plugins {
-  id("java")
+  java
+  `java-conventions`
+  `jacoco-report-aggregation`
   id("org.springframework.boot") version "3.1.2"
   id("io.spring.dependency-management") version "1.1.2"
 }
 
-group = "br.com.fullcycle"
-version = "0.0.1-SNAPSHOT"
+group = "br.com.fullcycle.infrastructure"
 
-java {
-  sourceCompatibility = JavaVersion.VERSION_17
-}
-
-repositories {
-  mavenCentral()
+tasks.bootJar {
+  archiveBaseName.set("application")
+  destinationDirectory.set(file("${rootProject.buildDir}/libs"))
 }
 
 dependencies {
@@ -31,12 +29,19 @@ dependencies {
   testImplementation("org.springframework.graphql:spring-graphql-test")
 
   testRuntimeOnly("com.h2database:h2")
-
-  testImplementation(platform("org.junit:junit-bom:5.9.1"))
-  testImplementation("org.junit.jupiter:junit-jupiter")
-  testImplementation("org.assertj:assertj-core:3.24.2")
 }
 
-tasks.test {
-  useJUnitPlatform()
+tasks.testCodeCoverageReport {
+  reports {
+    xml.required.set(true)
+    xml.outputLocation.set(file("$rootDir/build/reports/jacoco/test/jacocoTestReport.xml"))
+
+    html.required.set(true)
+    html.outputLocation.set(file("$rootDir/build/reports/jacoco/test/"))
+  }
 }
+
+tasks.named("jacocoTestReport") {
+  dependsOn(tasks.named<JacocoReport>("testCodeCoverageReport"))
+}
+
