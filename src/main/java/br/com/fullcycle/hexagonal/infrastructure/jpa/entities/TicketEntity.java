@@ -11,13 +11,14 @@ import jakarta.persistence.Table;
 
 import java.time.Instant;
 import java.util.Objects;
+import java.util.UUID;
 
 @Entity
 @Table(name = "tickets")
 public class TicketEntity {
 
   @Id
-  private String id;
+  private UUID id;
 
   @ManyToOne(fetch = FetchType.LAZY)
   private CustomerEntity customer;
@@ -36,7 +37,7 @@ public class TicketEntity {
   }
 
   public TicketEntity(
-    final String id,
+    final UUID id,
     final CustomerEntity customer,
     final EventEntity event,
     final TicketStatus status,
@@ -51,11 +52,11 @@ public class TicketEntity {
     this.reservedAt = reservedAt;
   }
 
-  public String getId() {
+  public UUID getId() {
     return this.id;
   }
 
-  public void setId(final String id) {
+  public void setId(final UUID id) {
     this.id = id;
   }
 

@@ -16,6 +16,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import java.util.UUID;
+
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
 @SpringBootTest
@@ -135,7 +137,7 @@ public class PartnerControllerTest {
       )
       .andReturn().getResponse().getContentAsByteArray();
 
-    final var partnerId = this.mapper.readValue(createResult, PartnerDTO.class).getId();
+    final UUID partnerId = this.mapper.readValue(createResult, PartnerDTO.class).getId();
 
     final var result = this.mvc.perform(
         MockMvcRequestBuilders.get("/partners/{id}", partnerId)

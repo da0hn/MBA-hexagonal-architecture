@@ -42,7 +42,7 @@ class CreateEventUseCaseIT extends IntegrationTest {
   @DisplayName("Deve criar um evento")
   void testCreate() {
     final var partner = this.createPartner("12345678901234", "partner@gmail.com", "Partner");
-    final var expectedPartnerId = partner.getId();
+    final UUID expectedPartnerId = partner.getId();
     final var expectedDate = "2021-01-01";
     final var expectedName = "Disney on Ice";
     final var expectedTotalSpots = 100;

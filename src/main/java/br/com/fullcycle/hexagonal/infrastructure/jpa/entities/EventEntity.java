@@ -12,13 +12,14 @@ import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 
 @Entity
 @Table(name = "events")
 public class EventEntity {
 
   @Id
-  private String id;
+  private UUID id;
 
   private String name;
 
@@ -36,7 +37,7 @@ public class EventEntity {
     this.tickets = new HashSet<>();
   }
 
-  public EventEntity(final String id, final String name, final LocalDate date, final int totalSpots, final Set<TicketEntity> tickets) {
+  public EventEntity(final UUID id, final String name, final LocalDate date, final int totalSpots, final Set<TicketEntity> tickets) {
     this.id = id;
     this.name = name;
     this.date = date;
@@ -44,11 +45,11 @@ public class EventEntity {
     this.tickets = tickets != null ? tickets : new HashSet<>();
   }
 
-  public String getId() {
+  public UUID getId() {
     return this.id;
   }
 
-  public void setId(final String id) {
+  public void setId(final UUID id) {
     this.id = id;
   }
 

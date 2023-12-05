@@ -2,9 +2,11 @@ package br.com.fullcycle.hexagonal.infrastructure.dtos;
 
 import br.com.fullcycle.hexagonal.infrastructure.jpa.entities.PartnerEntity;
 
+import java.util.UUID;
+
 public class PartnerDTO {
 
-  private Long id;
+  private UUID id;
 
   private String name;
 
@@ -15,7 +17,7 @@ public class PartnerDTO {
   public PartnerDTO() {
   }
 
-  public PartnerDTO(final Long id) {
+  public PartnerDTO(final UUID id) {
     this.id = id;
   }
 
@@ -26,11 +28,11 @@ public class PartnerDTO {
     this.email = partner.getEmail();
   }
 
-  public Long getId() {
+  public UUID getId() {
     return this.id;
   }
 
-  public void setId(final Long id) {
+  public void setId(final UUID id) {
     this.id = id;
   }
 

@@ -1,15 +1,22 @@
 package br.com.fullcycle.hexagonal.infrastructure.jpa.entities;
 
+import br.com.fullcycle.hexagonal.application.domain.partner.Partner;
+import br.com.fullcycle.hexagonal.application.domain.partner.PartnerId;
+import br.com.fullcycle.hexagonal.application.domain.person.Cnpj;
+import br.com.fullcycle.hexagonal.application.domain.person.Email;
+import br.com.fullcycle.hexagonal.application.domain.person.Name;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+
+import java.util.UUID;
 
 @Entity
 @Table(name = "partners")
 public class PartnerEntity {
 
   @Id
-  private String id;
+  private UUID id;
 
   private String name;
 
@@ -20,18 +27,27 @@ public class PartnerEntity {
   public PartnerEntity() {
   }
 
-  public PartnerEntity(final String id, final String name, final String cnpj, final String email) {
+  public PartnerEntity(final UUID id, final String name, final String cnpj, final String email) {
     this.id = id;
     this.name = name;
     this.cnpj = cnpj;
     this.email = email;
   }
 
-  public String getId() {
+  public static PartnerEntity of(final Partner partner) {
+    return new PartnerEntity(
+      partner.partnerId().value(),
+      partner.name().value(),
+      partner.cnpj().value(),
+      partner.email().value()
+    );
+  }
+
+  public UUID getId() {
     return this.id;
   }
 
-  public void setId(final String id) {
+  public void setId(final UUID id) {
     this.id = id;
   }
 
@@ -57,6 +73,10 @@ public class PartnerEntity {
 
   public void setEmail(final String email) {
     this.email = email;
+  }
+
+  public Partner toPartner() {
+    return new Partner(new PartnerId(this.id), new Name(this.name), new Cnpj(this.cnpj), new Email(this.email));
   }
 
 }
