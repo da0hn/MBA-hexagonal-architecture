@@ -65,8 +65,8 @@ class SubscribeCustomerToEventUseCaseIT extends IntegrationTest {
     final var customer = this.createCustomer("John Doe", "12345678900", "john.doe@gmai.com");
     final var event = this.createEvent("Event name", LocalDate.now().plusWeeks(2), 1, new HashSet<>());
 
-    final var eventId = event.getId();
-    final var customerId = customer.getId();
+    final UUID eventId = event.getId();
+    final UUID customerId = customer.getId();
 
     final var input = new SubscribeCustomerToEventUseCase.Input(eventId.toString(), customerId.toString());
 
@@ -84,7 +84,7 @@ class SubscribeCustomerToEventUseCaseIT extends IntegrationTest {
 
     final var customer = this.createCustomer("John Doe", "12345678900", "john.doe@gmai.com");
 
-    final var customerId = customer.getId();
+    final UUID customerId = customer.getId();
     final var eventId = UUID.randomUUID();
 
     final var input = new SubscribeCustomerToEventUseCase.Input(eventId.toString(), customerId.toString());
@@ -100,7 +100,7 @@ class SubscribeCustomerToEventUseCaseIT extends IntegrationTest {
 
     final var expectedMessage = "Customer not found";
     final var event = this.createEvent("Event name", LocalDate.now().plusWeeks(2), 1, new HashSet<>());
-    final var eventId = event.getId();
+    final UUID eventId = event.getId();
     final var customerId = UUID.randomUUID();
 
     final var input = new SubscribeCustomerToEventUseCase.Input(eventId.toString(), customerId.toString());
@@ -117,8 +117,8 @@ class SubscribeCustomerToEventUseCaseIT extends IntegrationTest {
     final var customer = this.createCustomer("John Doe", "12345678900", "john.doe@gmai.com");
     final var event = this.createEvent("Event name", LocalDate.now().plusWeeks(2), 5, new HashSet<>());
 
-    final var customerId = customer.getId();
-    final var eventId = event.getId();
+    final UUID customerId = customer.getId();
+    final UUID eventId = event.getId();
 
     final var ticket = new TicketEntity();
     ticket.setCustomer(customer);
@@ -145,8 +145,8 @@ class SubscribeCustomerToEventUseCaseIT extends IntegrationTest {
     final var customer = this.createCustomer("John Doe", "12345678900", "john.doe@gmai.com");
     final var event = this.createEvent("Event name", LocalDate.now().plusWeeks(2), 1, new HashSet<>());
 
-    final var customerId = customer.getId();
-    final var eventId = event.getId();
+    final UUID customerId = customer.getId();
+    final UUID eventId = event.getId();
 
     final var ticket = new TicketEntity();
     ticket.setCustomer(otherCustomer);

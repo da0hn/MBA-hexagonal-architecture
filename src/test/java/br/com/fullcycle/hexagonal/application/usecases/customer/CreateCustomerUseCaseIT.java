@@ -20,7 +20,7 @@ class CreateCustomerUseCaseIT extends IntegrationTest {
   @Autowired
   private CustomerJpaRepository customerRepository;
 
-  private static CustomerEntity createCustomer(final String cpf, final String email, final String name, final long customerId) {
+  private static CustomerEntity createCustomer(final String cpf, final String email, final String name, final UUID customerId) {
     final var aCustomer = new CustomerEntity();
     aCustomer.setId(customerId);
     aCustomer.setCpf(cpf);
@@ -57,7 +57,7 @@ class CreateCustomerUseCaseIT extends IntegrationTest {
     final var expectedCPF = "12345678901";
     final var expectedName = "John Doe";
     final var expectedEmail = "john.doe123@gmail.com";
-    final var customerId = UUID.randomUUID().getMostSignificantBits();
+    final UUID customerId = UUID.randomUUID();
 
     final var input = new CreateCustomerUseCase.Input(expectedCPF, expectedEmail, expectedName);
 
@@ -77,7 +77,7 @@ class CreateCustomerUseCaseIT extends IntegrationTest {
     final var expectedCPF = "00000000000";
     final var expectedName = "John Doe";
     final var expectedEmail = "john.doe@gmail.com";
-    final var customerId = UUID.randomUUID().getMostSignificantBits();
+    final UUID customerId = UUID.randomUUID();
 
     final var input = new CreateCustomerUseCase.Input(expectedCPF, expectedEmail, expectedName);
 

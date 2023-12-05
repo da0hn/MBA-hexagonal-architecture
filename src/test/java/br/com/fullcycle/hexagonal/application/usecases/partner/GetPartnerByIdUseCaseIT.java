@@ -34,7 +34,7 @@ class GetPartnerByIdUseCaseIT extends IntegrationTest {
     final var aPartner = new PartnerEntity(null, expectedName, expectedCnpj, expectedEmail);
     this.partnerRepository.save(aPartner);
 
-    final var expectedId = aPartner.getId();
+    final UUID expectedId = aPartner.getId();
 
     final var output = this.useCase.execute(new GetPartnerByIdUseCase.Input(null));
 
