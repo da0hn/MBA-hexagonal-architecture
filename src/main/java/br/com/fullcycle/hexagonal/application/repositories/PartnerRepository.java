@@ -19,4 +19,6 @@ public interface PartnerRepository {
 
   Partner update(Partner partner);
 
+  void deleteAll();
+
 }

@@ -1,15 +1,14 @@
 package br.com.fullcycle.hexagonal.application.usecases.partner;
 
 import br.com.fullcycle.hexagonal.IntegrationTest;
-import br.com.fullcycle.hexagonal.infrastructure.jpa.entities.PartnerEntity;
-import br.com.fullcycle.hexagonal.infrastructure.jpa.repositories.PartnerJpaRepository;
+import br.com.fullcycle.hexagonal.application.domain.partner.Partner;
+import br.com.fullcycle.hexagonal.application.domain.partner.PartnerId;
+import br.com.fullcycle.hexagonal.application.repositories.PartnerRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.UUID;
 
 class GetPartnerByIdUseCaseIT extends IntegrationTest {
 
@@ -17,7 +16,7 @@ class GetPartnerByIdUseCaseIT extends IntegrationTest {
   private GetPartnerByIdUseCase useCase;
 
   @Autowired
-  private PartnerJpaRepository partnerRepository;
+  private PartnerRepository partnerRepository;
 
   @AfterEach
   void tearDown() {
@@ -31,12 +30,11 @@ class GetPartnerByIdUseCaseIT extends IntegrationTest {
     final var expectedEmail = "john.doe@gmail.com";
     final var expectedCnpj = "12.345.678/0009-00";
 
-    final var aPartner = new PartnerEntity(null, expectedName, expectedCnpj, expectedEmail);
-    this.partnerRepository.save(aPartner);
+    final var aPartner = this.partnerRepository.create(Partner.newPartner(expectedName, expectedCnpj, expectedEmail));
 
-    final UUID expectedId = aPartner.getId();
+    final var expectedId = aPartner.partnerId().asString();
 
-    final var output = this.useCase.execute(new GetPartnerByIdUseCase.Input(null));
+    final var output = this.useCase.execute(new GetPartnerByIdUseCase.Input(expectedId));
 
     Assertions.assertThat(output.isPresent()).isTrue();
     Assertions.assertThat(output.get().id()).isEqualTo(expectedId);
@@ -48,10 +46,7 @@ class GetPartnerByIdUseCaseIT extends IntegrationTest {
   @Test
   @DisplayName("Deve obter vazio ao tentar recuperar um parceiro não existente por id")
   void testGetByIdWithInvalidId() {
-    final var expectedId = UUID.randomUUID().getMostSignificantBits();
-
-    final var output = this.useCase.execute(new GetPartnerByIdUseCase.Input(null));
-
+    final var output = this.useCase.execute(new GetPartnerByIdUseCase.Input(PartnerId.unique().asString()));
     Assertions.assertThat(output.isEmpty()).isTrue();
   }
 

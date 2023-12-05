@@ -15,7 +15,7 @@ public record PartnerId(UUID value) {
       return new PartnerId(UUID.fromString(value));
     }
     catch (final Exception e) {
-      throw new ValidationException("Invalid value for customer id");
+      throw new ValidationException("Invalid value for partner id");
     }
   }
 

@@ -32,4 +32,9 @@ public class EventRepositoryAdapter implements EventRepository {
     return this.eventJpaRepository.save(EventEntity.of(event)).toEvent();
   }
 
+  @Override
+  public void deleteAll() {
+    this.eventJpaRepository.deleteAll();
+  }
+
 }

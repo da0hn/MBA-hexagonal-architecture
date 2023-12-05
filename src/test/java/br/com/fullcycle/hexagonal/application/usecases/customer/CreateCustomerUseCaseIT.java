@@ -1,9 +1,10 @@
 package br.com.fullcycle.hexagonal.application.usecases.customer;
 
 import br.com.fullcycle.hexagonal.IntegrationTest;
+import br.com.fullcycle.hexagonal.application.domain.customer.Customer;
 import br.com.fullcycle.hexagonal.application.exceptions.ValidationException;
+import br.com.fullcycle.hexagonal.application.repositories.CustomerRepository;
 import br.com.fullcycle.hexagonal.infrastructure.jpa.entities.CustomerEntity;
-import br.com.fullcycle.hexagonal.infrastructure.jpa.repositories.CustomerJpaRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -18,7 +19,7 @@ class CreateCustomerUseCaseIT extends IntegrationTest {
   private CreateCustomerUseCase useCase;
 
   @Autowired
-  private CustomerJpaRepository customerRepository;
+  private CustomerRepository customerRepository;
 
   private static CustomerEntity createCustomer(final String cpf, final String email, final String name, final UUID customerId) {
     final var aCustomer = new CustomerEntity();
@@ -37,7 +38,7 @@ class CreateCustomerUseCaseIT extends IntegrationTest {
   @Test
   @DisplayName("Deve criar um cliente")
   void testCreate() {
-    final var expectedCPF = "12345678901";
+    final var expectedCPF = "123.456.789-01";
     final var expectedName = "John Doe";
     final var expectedEmail = "john.doe@gmail.com";
 
@@ -54,16 +55,15 @@ class CreateCustomerUseCaseIT extends IntegrationTest {
   @Test
   @DisplayName("Não deve cadastrar um cliente com CPF duplicado")
   void testCreateWithDuplicatedCPFShouldFail() {
-    final var expectedCPF = "12345678901";
+    final var expectedCPF = "123.456.789-01";
     final var expectedName = "John Doe";
     final var expectedEmail = "john.doe123@gmail.com";
-    final UUID customerId = UUID.randomUUID();
+
+    final var aCustomer = Customer.newCustomer(expectedName, expectedCPF, expectedEmail);
+
+    this.customerRepository.create(aCustomer);
 
     final var input = new CreateCustomerUseCase.Input(expectedCPF, expectedEmail, expectedName);
-
-    final var aCustomer = createCustomer(expectedCPF, expectedEmail, expectedName, customerId);
-
-    this.customerRepository.save(aCustomer);
 
     Assertions.assertThatThrownBy(() -> this.useCase.execute(input))
       .isInstanceOf(ValidationException.class)
@@ -73,17 +73,17 @@ class CreateCustomerUseCaseIT extends IntegrationTest {
   @Test
   @DisplayName("Não deve cadastrar um cliente com email duplicado")
   void testCreateWithDuplicatedEmailShouldFail() {
-    final var existentCustomerCPF = "12345678901";
-    final var expectedCPF = "00000000000";
+    final var existentCustomerCPF = "123.456.789-01";
+    final var expectedCPF = "123.456.789-02";
     final var expectedName = "John Doe";
     final var expectedEmail = "john.doe@gmail.com";
     final UUID customerId = UUID.randomUUID();
 
     final var input = new CreateCustomerUseCase.Input(expectedCPF, expectedEmail, expectedName);
 
-    final var aCustomer = createCustomer(existentCustomerCPF, expectedEmail, expectedName, customerId);
+    final var aCustomer = Customer.newCustomer(expectedName, existentCustomerCPF, expectedEmail);
 
-    this.customerRepository.save(aCustomer);
+    this.customerRepository.create(aCustomer);
 
     Assertions.assertThatThrownBy(() -> this.useCase.execute(input))
       .isInstanceOf(ValidationException.class)

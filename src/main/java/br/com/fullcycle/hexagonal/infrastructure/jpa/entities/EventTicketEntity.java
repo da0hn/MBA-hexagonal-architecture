@@ -13,7 +13,7 @@ import jakarta.persistence.Table;
 import java.util.UUID;
 
 @Entity(name = "EventTicket")
-@Table(name = "events_tickets")
+@Table(name = "event_tickets")
 public class EventTicketEntity {
 
   @Id

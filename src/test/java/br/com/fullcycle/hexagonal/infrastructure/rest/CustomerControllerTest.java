@@ -1,5 +1,6 @@
 package br.com.fullcycle.hexagonal.infrastructure.rest;
 
+import br.com.fullcycle.hexagonal.application.repositories.CustomerRepository;
 import br.com.fullcycle.hexagonal.application.usecases.customer.CreateCustomerUseCase;
 import br.com.fullcycle.hexagonal.application.usecases.customer.GetCustomerByIdUseCase;
 import br.com.fullcycle.hexagonal.infrastructure.dtos.NewCustomerDTO;
@@ -30,13 +31,13 @@ public class CustomerControllerTest {
   private ObjectMapper mapper;
 
   @Autowired
-  private CustomerJpaRepository customerRepository;
+  private CustomerRepository customerRepository;
 
   @Test
   @DisplayName("Deve criar um cliente")
   public void testCreate() throws Exception {
 
-    final var customer = new NewCustomerDTO("John Doe", "12345678901", "john.doe@gmail.com");
+    final var customer = new NewCustomerDTO("John Doe", "123.456.789-01", "john.doe@gmail.com");
 
     final var result = this.mvc.perform(
         MockMvcRequestBuilders.post("/customers")
@@ -45,7 +46,7 @@ public class CustomerControllerTest {
       )
       .andExpect(MockMvcResultMatchers.status().isCreated())
       .andExpect(MockMvcResultMatchers.header().exists("Location"))
-      .andExpect(MockMvcResultMatchers.jsonPath("$.id").isNumber())
+      .andExpect(MockMvcResultMatchers.jsonPath("$.id").isString())
       .andReturn().getResponse().getContentAsByteArray();
 
     final var actualResponse = this.mapper.readValue(result, NewCustomerDTO.class);
@@ -58,7 +59,7 @@ public class CustomerControllerTest {
   @DisplayName("Não deve cadastrar um cliente com CPF duplicado")
   public void testCreateWithDuplicatedCPFShouldFail() throws Exception {
 
-    final var customer = new NewCustomerDTO("John Doe", "12345678901", "john.doe@gmail.com");
+    final var customer = new NewCustomerDTO("John Doe", "123.456.789-01", "john.doe@gmail.com");
 
     // Cria o primeiro cliente
     this.mvc.perform(
@@ -68,10 +69,10 @@ public class CustomerControllerTest {
       )
       .andExpect(MockMvcResultMatchers.status().isCreated())
       .andExpect(MockMvcResultMatchers.header().exists("Location"))
-      .andExpect(MockMvcResultMatchers.jsonPath("$.id").isNumber())
+      .andExpect(MockMvcResultMatchers.jsonPath("$.id").isString())
       .andReturn().getResponse().getContentAsByteArray();
 
-    final var otherCustomer = new NewCustomerDTO("John Doe", "12345678901", "john2@gmail.com");
+    final var otherCustomer = new NewCustomerDTO("John Doe", "123.456.789-01", "john2@gmail.com");
 
     // Tenta criar o segundo cliente com o mesmo CPF
     this.mvc.perform(
@@ -87,7 +88,7 @@ public class CustomerControllerTest {
   @DisplayName("Não deve cadastrar um cliente com e-mail duplicado")
   public void testCreateWithDuplicatedEmailShouldFail() throws Exception {
 
-    final var customer = new NewCustomerDTO("John Doe", "12345678901", "john.doe@gmail.com");
+    final var customer = new NewCustomerDTO("John Doe", "123.456.789-01", "john.doe@gmail.com");
 
     // Cria o primeiro cliente
     this.mvc.perform(
@@ -97,10 +98,10 @@ public class CustomerControllerTest {
       )
       .andExpect(MockMvcResultMatchers.status().isCreated())
       .andExpect(MockMvcResultMatchers.header().exists("Location"))
-      .andExpect(MockMvcResultMatchers.jsonPath("$.id").isNumber())
+      .andExpect(MockMvcResultMatchers.jsonPath("$.id").isString())
       .andReturn().getResponse().getContentAsByteArray();
 
-    final var otherCustomer = new NewCustomerDTO("John Doe", "99999918901", "john.doe@gmail.com");
+    final var otherCustomer = new NewCustomerDTO("John Doe", "999.999.189-01", "john.doe@gmail.com");
 
     // Tenta criar o segundo cliente com o mesmo CPF
     this.mvc.perform(
@@ -116,7 +117,7 @@ public class CustomerControllerTest {
   @DisplayName("Deve obter um cliente por id")
   public void testGet() throws Exception {
 
-    final var customer = new NewCustomerDTO("John Doe", "12345678901", "john.doe@gmail.com");
+    final var customer = new NewCustomerDTO("John Doe", "123.456.789-01", "john.doe@gmail.com");
 
     final var createResult = this.mvc.perform(
         MockMvcRequestBuilders.post("/customers")

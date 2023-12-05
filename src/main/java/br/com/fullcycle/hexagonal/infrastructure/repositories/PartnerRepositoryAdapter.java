@@ -50,4 +50,9 @@ public class PartnerRepositoryAdapter implements PartnerRepository {
     return this.partnerJpaRepository.save(PartnerEntity.of(partner)).toPartner();
   }
 
+  @Override
+  public void deleteAll() {
+    this.partnerJpaRepository.deleteAll();
+  }
+
 }

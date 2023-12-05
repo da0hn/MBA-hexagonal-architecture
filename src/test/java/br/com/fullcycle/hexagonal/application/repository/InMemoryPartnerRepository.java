@@ -56,4 +56,11 @@ public class InMemoryPartnerRepository implements PartnerRepository {
     return partner;
   }
 
+  @Override
+  public void deleteAll() {
+    this.partners.clear();
+    this.partnersByEmail.clear();
+    this.partnersByCnpj.clear();
+  }
+
 }

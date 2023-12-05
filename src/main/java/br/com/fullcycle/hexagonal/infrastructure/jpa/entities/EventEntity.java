@@ -44,6 +44,7 @@ public class EventEntity {
     final int totalSpots,
     final UUID partnerId
   ) {
+    this();
     this.id = id;
     this.name = name;
     this.date = date;

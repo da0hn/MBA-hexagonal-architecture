@@ -1,17 +1,16 @@
 package br.com.fullcycle.hexagonal.application.usecases.event;
 
 import br.com.fullcycle.hexagonal.IntegrationTest;
+import br.com.fullcycle.hexagonal.application.domain.partner.Partner;
+import br.com.fullcycle.hexagonal.application.domain.partner.PartnerId;
 import br.com.fullcycle.hexagonal.application.exceptions.ValidationException;
-import br.com.fullcycle.hexagonal.infrastructure.jpa.entities.PartnerEntity;
-import br.com.fullcycle.hexagonal.infrastructure.jpa.repositories.EventJpaRepository;
-import br.com.fullcycle.hexagonal.infrastructure.jpa.repositories.PartnerJpaRepository;
+import br.com.fullcycle.hexagonal.application.repositories.EventRepository;
+import br.com.fullcycle.hexagonal.application.repositories.PartnerRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.UUID;
 
 class CreateEventUseCaseIT extends IntegrationTest {
 
@@ -19,17 +18,13 @@ class CreateEventUseCaseIT extends IntegrationTest {
   private CreateEventUseCase createEventUseCase;
 
   @Autowired
-  private PartnerJpaRepository partnerRepository;
+  private PartnerRepository partnerRepository;
 
   @Autowired
-  private EventJpaRepository eventRepository;
+  private EventRepository eventRepository;
 
-  private PartnerEntity createPartner(final String cnpj, final String email, final String name) {
-    final var partner = new PartnerEntity();
-    partner.setCnpj(cnpj);
-    partner.setEmail(email);
-    partner.setName(name);
-    return this.partnerRepository.save(partner);
+  private Partner createPartner(final String cnpj, final String email, final String name) {
+    return this.partnerRepository.create(Partner.newPartner(name, cnpj, email));
   }
 
   @AfterEach
@@ -41,14 +36,14 @@ class CreateEventUseCaseIT extends IntegrationTest {
   @Test
   @DisplayName("Deve criar um evento")
   void testCreate() {
-    final var partner = this.createPartner("12345678901234", "partner@gmail.com", "Partner");
-    final UUID expectedPartnerId = partner.getId();
+    final var partner = this.createPartner("12.345.678/9012-34", "partner@gmail.com", "Partner");
+    final var expectedPartnerId = partner.partnerId().asString();
     final var expectedDate = "2021-01-01";
     final var expectedName = "Disney on Ice";
     final var expectedTotalSpots = 100;
 
     final var output = this.createEventUseCase.execute(
-      new CreateEventUseCase.Input(expectedDate, expectedName, null, expectedTotalSpots)
+      new CreateEventUseCase.Input(expectedDate, expectedName, expectedPartnerId, expectedTotalSpots)
     );
 
     Assertions.assertThat(output.id()).isNotNull();
@@ -61,11 +56,10 @@ class CreateEventUseCaseIT extends IntegrationTest {
   @Test
   @DisplayName("Não deve cadastrar um evento quando o parceiro não for encontrado")
   void testCreateEvent_whenPartnerDoesntExists_shouldThrowException() {
-    final var expectedPartnerId = UUID.randomUUID().getMostSignificantBits();
     final var expectedDate = "2021-01-01";
     final var expectedName = "Disney on Ice";
 
-    final var input = new CreateEventUseCase.Input(expectedDate, expectedName, null, 100);
+    final var input = new CreateEventUseCase.Input(expectedDate, expectedName, PartnerId.unique().asString(), 100);
 
     Assertions.assertThatThrownBy(() -> this.createEventUseCase.execute(input))
       .isInstanceOf(ValidationException.class)

@@ -55,4 +55,11 @@ public class InMemoryCustomerRepository implements CustomerRepository {
     return customer;
   }
 
+  @Override
+  public void deleteAll() {
+    this.customers.clear();
+    this.customersByEmail.clear();
+    this.customersByCpf.clear();
+  }
+
 }

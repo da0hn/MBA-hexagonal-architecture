@@ -1,23 +1,22 @@
 package br.com.fullcycle.hexagonal.application.usecases.event;
 
 import br.com.fullcycle.hexagonal.IntegrationTest;
+import br.com.fullcycle.hexagonal.application.domain.customer.Customer;
+import br.com.fullcycle.hexagonal.application.domain.event.Event;
+import br.com.fullcycle.hexagonal.application.domain.partner.Partner;
 import br.com.fullcycle.hexagonal.application.domain.ticket.TicketStatus;
 import br.com.fullcycle.hexagonal.application.exceptions.ValidationException;
-import br.com.fullcycle.hexagonal.infrastructure.jpa.entities.CustomerEntity;
-import br.com.fullcycle.hexagonal.infrastructure.jpa.entities.EventEntity;
-import br.com.fullcycle.hexagonal.infrastructure.jpa.entities.TicketEntity;
-import br.com.fullcycle.hexagonal.infrastructure.jpa.repositories.CustomerJpaRepository;
-import br.com.fullcycle.hexagonal.infrastructure.jpa.repositories.EventJpaRepository;
-import br.com.fullcycle.hexagonal.infrastructure.jpa.repositories.TicketJpaRepository;
+import br.com.fullcycle.hexagonal.application.repositories.CustomerRepository;
+import br.com.fullcycle.hexagonal.application.repositories.EventRepository;
+import br.com.fullcycle.hexagonal.application.repositories.PartnerRepository;
+import br.com.fullcycle.hexagonal.application.repositories.TicketRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.time.Instant;
 import java.time.LocalDate;
-import java.util.HashSet;
 import java.util.UUID;
 
 class SubscribeCustomerToEventUseCaseIT extends IntegrationTest {
@@ -26,34 +25,32 @@ class SubscribeCustomerToEventUseCaseIT extends IntegrationTest {
   private SubscribeCustomerToEventUseCase subscribeCustomerToEventUseCase;
 
   @Autowired
-  private EventJpaRepository eventRepository;
+  private EventRepository eventRepository;
 
   @Autowired
-  private CustomerJpaRepository customerRepository;
+  private CustomerRepository customerRepository;
 
   @Autowired
-  private TicketJpaRepository ticketRepository;
+  private PartnerRepository partnerRepository;
 
-  private EventEntity createEvent(
-    final String eventName,
+  @Autowired
+  private TicketRepository ticketRepository;
+
+  private Event createEvent(
+    final String name,
     final LocalDate date,
     final int totalSpots,
-    final HashSet<TicketEntity> tickets
+    final Partner partner
   ) {
-    final var event = new EventEntity();
-    event.setName(eventName);
-    event.setDate(date);
-    event.setTotalSpots(totalSpots);
-    event.setTickets(null);
-    return this.eventRepository.save(event);
+    return this.eventRepository.create(Event.newEvent(name, date.toString(), totalSpots, partner));
   }
 
-  private CustomerEntity createCustomer(final String name, final String cpf, final String email) {
-    final var customer = new CustomerEntity();
-    customer.setName(name);
-    customer.setCpf(cpf);
-    customer.setEmail(email);
-    return this.customerRepository.save(customer);
+  private Customer createCustomer(final String name, final String cpf, final String email) {
+    return this.customerRepository.create(Customer.newCustomer(name, cpf, email));
+  }
+
+  private Partner createPartner(final String name, final String cnpj, final String email) {
+    return this.partnerRepository.create(Partner.newPartner(name, cnpj, email));
   }
 
   @AfterEach
@@ -61,19 +58,21 @@ class SubscribeCustomerToEventUseCaseIT extends IntegrationTest {
     this.eventRepository.deleteAll();
     this.customerRepository.deleteAll();
     this.ticketRepository.deleteAll();
+    this.partnerRepository.deleteAll();
   }
 
   @Test
   @DisplayName("Deve comprar um ticket de um evento")
   void testReserveTicket() {
 
-    final var customer = this.createCustomer("John Doe", "12345678900", "john.doe@gmai.com");
-    final var event = this.createEvent("Event name", LocalDate.now().plusWeeks(2), 1, new HashSet<>());
+    final var customer = this.createCustomer("John Doe", "123.456.789-00", "john.doe@gmai.com");
+    final var partner = this.createPartner("Partner", "12.345.678/9012-34", "partner@gmail.com");
+    final var event = this.createEvent("Event name", LocalDate.now().plusWeeks(2), 1, partner);
 
-    final UUID eventId = event.getId();
-    final UUID customerId = customer.getId();
+    final var eventId = event.eventId().asString();
+    final var customerId = customer.customerId().asString();
 
-    final var input = new SubscribeCustomerToEventUseCase.Input(eventId.toString(), customerId.toString());
+    final var input = new SubscribeCustomerToEventUseCase.Input(eventId, customerId);
 
     final var output = this.subscribeCustomerToEventUseCase.execute(input);
 
@@ -87,12 +86,12 @@ class SubscribeCustomerToEventUseCaseIT extends IntegrationTest {
   void testReserveTicketWithoutEvent() {
     final var expectedMessage = "Event not found";
 
-    final var customer = this.createCustomer("John Doe", "12345678900", "john.doe@gmai.com");
+    final var customer = this.createCustomer("John Doe", "123.456.789-00", "john.doe@gmai.com");
 
-    final UUID customerId = customer.getId();
-    final var eventId = UUID.randomUUID();
+    final var customerId = customer.customerId().asString();
+    final var eventId = UUID.randomUUID().toString();
 
-    final var input = new SubscribeCustomerToEventUseCase.Input(eventId.toString(), customerId.toString());
+    final var input = new SubscribeCustomerToEventUseCase.Input(eventId, customerId);
 
     Assertions.assertThatThrownBy(() -> this.subscribeCustomerToEventUseCase.execute(input))
       .isInstanceOf(ValidationException.class)
@@ -104,11 +103,12 @@ class SubscribeCustomerToEventUseCaseIT extends IntegrationTest {
   void testReserveTicketWithoutCustomer() {
 
     final var expectedMessage = "Customer not found";
-    final var event = this.createEvent("Event name", LocalDate.now().plusWeeks(2), 1, new HashSet<>());
-    final UUID eventId = event.getId();
-    final var customerId = UUID.randomUUID();
+    final var partner = this.createPartner("Partner", "12.345.678/9012-34", "partner@gmail.com");
+    final var event = this.createEvent("Event name", LocalDate.now().plusWeeks(2), 1, partner);
+    final var eventId = event.eventId().asString();
+    final var customerId = UUID.randomUUID().toString();
 
-    final var input = new SubscribeCustomerToEventUseCase.Input(eventId.toString(), customerId.toString());
+    final var input = new SubscribeCustomerToEventUseCase.Input(eventId, customerId);
 
     Assertions.assertThatThrownBy(() -> this.subscribeCustomerToEventUseCase.execute(input))
       .isInstanceOf(ValidationException.class)
@@ -119,21 +119,18 @@ class SubscribeCustomerToEventUseCaseIT extends IntegrationTest {
   @DisplayName("Não deve comprar um ticket quando o cliente já comprou")
   void testReserveTicketMoreThanOnce() {
     final var expectedMessage = "Email already registered";
-    final var customer = this.createCustomer("John Doe", "12345678900", "john.doe@gmai.com");
-    final var event = this.createEvent("Event name", LocalDate.now().plusWeeks(2), 5, new HashSet<>());
+    final var customer = this.createCustomer("John Doe", "123.456.789-00", "john.doe@gmai.com");
+    final var partner = Partner.newPartner("Partner", "12.345.678/9012-34", "partner@gmail.com");
+    final var event = this.createEvent("Event name", LocalDate.now().plusWeeks(2), 5, partner);
 
-    final UUID customerId = customer.getId();
-    final UUID eventId = event.getId();
+    final var customerId = customer.customerId().asString();
+    final var eventId = event.eventId().asString();
 
-    final var ticket = new TicketEntity();
-    ticket.setCustomerId(customerId);
-    ticket.setEventId(eventId);
-    ticket.setReservedAt(Instant.now());
-    ticket.setStatus(TicketStatus.PENDING);
+    final var ticket = event.reserveTicket(customer.customerId());
+    this.ticketRepository.create(ticket);
+    this.eventRepository.update(event);
 
-    this.ticketRepository.save(ticket);
-
-    final var input = new SubscribeCustomerToEventUseCase.Input(eventId.toString(), customerId.toString());
+    final var input = new SubscribeCustomerToEventUseCase.Input(eventId, customerId);
 
     Assertions.assertThatThrownBy(() -> this.subscribeCustomerToEventUseCase.execute(input))
       .isInstanceOf(ValidationException.class)
@@ -146,24 +143,19 @@ class SubscribeCustomerToEventUseCaseIT extends IntegrationTest {
 
     final var expectedMessage = "Event sold out";
 
-    final var otherCustomer = this.createCustomer("John Doe", "12345678900", "john.doe@gmai.com");
-    final var customer = this.createCustomer("John Doe", "12345678900", "john.doe@gmai.com");
-    final var event = this.createEvent("Event name", LocalDate.now().plusWeeks(2), 1, new HashSet<>());
+    final var otherCustomer = this.createCustomer("John Doe", "123.456.789-00", "john.doe@gmai.com");
+    final var customer = this.createCustomer("John Doe", "123.456.789-00", "john.doe@gmai.com");
+    final var partner = Partner.newPartner("Partner", "12.345.678/9012-34", "partner@gmail.com");
+    final var event = this.createEvent("Event name", LocalDate.now().plusWeeks(2), 1, partner);
 
-    final UUID customerId = customer.getId();
-    final UUID eventId = event.getId();
+    final var customerId = customer.customerId().asString();
+    final var eventId = event.eventId().asString();
 
-    final var ticket = new TicketEntity();
-    ticket.setCustomerId(otherCustomer.getId());
-    ticket.setEventId(event.getId());
-    ticket.setReservedAt(Instant.now());
-    ticket.setStatus(TicketStatus.PENDING);
+    final var ticket = event.reserveTicket(otherCustomer.customerId());
+    this.ticketRepository.create(ticket);
+    this.eventRepository.update(event);
 
-//    event.getTickets().add(ticket);
-    this.ticketRepository.save(ticket);
-    this.eventRepository.save(event);
-
-    final var input = new SubscribeCustomerToEventUseCase.Input(eventId.toString(), customerId.toString());
+    final var input = new SubscribeCustomerToEventUseCase.Input(eventId, customerId);
 
     Assertions.assertThatThrownBy(() -> this.subscribeCustomerToEventUseCase.execute(input))
       .isInstanceOf(ValidationException.class)

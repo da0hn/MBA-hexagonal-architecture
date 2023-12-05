@@ -19,7 +19,7 @@ class GetCustomerByIdUseCaseTest {
     final var expectedId = CustomerId.unique();
     final var expectedName = "John Doe";
     final var expectedEmail = "john.doe@gmail.com";
-    final var expectedCpf = "12345678900";
+    final var expectedCpf = "123.456.789-00";
 
     final var customerRepository = new InMemoryCustomerRepository();
 

@@ -1,9 +1,9 @@
 package br.com.fullcycle.hexagonal.application.usecases.partner;
 
 import br.com.fullcycle.hexagonal.IntegrationTest;
+import br.com.fullcycle.hexagonal.application.domain.partner.Partner;
 import br.com.fullcycle.hexagonal.application.exceptions.ValidationException;
-import br.com.fullcycle.hexagonal.infrastructure.jpa.entities.PartnerEntity;
-import br.com.fullcycle.hexagonal.infrastructure.jpa.repositories.PartnerJpaRepository;
+import br.com.fullcycle.hexagonal.application.repositories.PartnerRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -16,14 +16,10 @@ class CreatePartnerUseCaseIT extends IntegrationTest {
   private CreatePartnerUseCase useCase;
 
   @Autowired
-  private PartnerJpaRepository partnerRepository;
+  private PartnerRepository partnerRepository;
 
-  private PartnerEntity createPartner(final String cnpj, final String email, final String name) {
-    final var aPartner = new PartnerEntity();
-    aPartner.setCnpj(cnpj);
-    aPartner.setEmail(email);
-    aPartner.setName(name);
-    return this.partnerRepository.save(aPartner);
+  private Partner createPartner(final String cnpj, final String email, final String name) {
+    return this.partnerRepository.create(Partner.newPartner(name, cnpj, email));
   }
 
   @AfterEach
@@ -34,7 +30,7 @@ class CreatePartnerUseCaseIT extends IntegrationTest {
   @Test
   @DisplayName("Deve criar um parceiro")
   void testCreate() {
-    final var expectedCNPJ = "12345678901";
+    final var expectedCNPJ = "12.345.678/9010-00";
     final var expectedName = "John Doe";
     final var expectedEmail = "john.doe@gmail.com";
 
@@ -51,13 +47,13 @@ class CreatePartnerUseCaseIT extends IntegrationTest {
   @Test
   @DisplayName("Não deve cadastrar um cliente com CPF duplicado")
   void testCreateWithDuplicatedCPFShouldFail() {
-    final var expectedCNPJ = "12345678901";
+    final var expectedCNPJ = "12.345.678/9010-00";
     final var expectedName = "John Doe";
     final var expectedEmail = "john.doe@gmail.com";
 
     final var aPartner = this.createPartner(expectedCNPJ, "john.doe123@gmail.com", "Another John Doe");
 
-    final var input = new CreatePartnerUseCase.Input(aPartner.getCnpj(), expectedEmail, expectedName);
+    final var input = new CreatePartnerUseCase.Input(aPartner.cnpj().value(), expectedEmail, expectedName);
 
     Assertions.assertThatThrownBy(() -> this.useCase.execute(input))
       .isInstanceOf(ValidationException.class)
@@ -67,13 +63,13 @@ class CreatePartnerUseCaseIT extends IntegrationTest {
   @Test
   @DisplayName("Não deve cadastrar um cliente com email duplicado")
   void testCreateWithDuplicatedEmailShouldFail() {
-    final var expectedCNPJ = "12345678901";
+    final var expectedCNPJ = "12.345.678/9010-00";
     final var expectedName = "John Doe";
     final var expectedEmail = "john.doe@gmail.com";
 
-    final var aPartner = this.createPartner("12312312300", expectedEmail, "Another John Doe");
+    final var aPartner = this.createPartner("12.312.312/3000-01", expectedEmail, "Another John Doe");
 
-    final var input = new CreatePartnerUseCase.Input(expectedCNPJ, aPartner.getEmail(), expectedName);
+    final var input = new CreatePartnerUseCase.Input(expectedCNPJ, aPartner.email().value(), expectedName);
 
     Assertions.assertThatThrownBy(() -> this.useCase.execute(input))
       .isInstanceOf(ValidationException.class)
