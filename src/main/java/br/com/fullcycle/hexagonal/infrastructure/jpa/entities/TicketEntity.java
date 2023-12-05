@@ -1,10 +1,10 @@
 package br.com.fullcycle.hexagonal.infrastructure.jpa.entities;
 
+import br.com.fullcycle.hexagonal.application.domain.ticket.TicketStatus;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -12,15 +12,12 @@ import jakarta.persistence.Table;
 import java.time.Instant;
 import java.util.Objects;
 
-import static jakarta.persistence.GenerationType.IDENTITY;
-
 @Entity
 @Table(name = "tickets")
 public class TicketEntity {
 
   @Id
-  @GeneratedValue(strategy = IDENTITY)
-  private Long id;
+  private String id;
 
   @ManyToOne(fetch = FetchType.LAZY)
   private CustomerEntity customer;
@@ -38,7 +35,14 @@ public class TicketEntity {
   public TicketEntity() {
   }
 
-  public TicketEntity(final Long id, final CustomerEntity customer, final EventEntity event, final TicketStatus status, final Instant paidAt, final Instant reservedAt) {
+  public TicketEntity(
+    final String id,
+    final CustomerEntity customer,
+    final EventEntity event,
+    final TicketStatus status,
+    final Instant paidAt,
+    final Instant reservedAt
+  ) {
     this.id = id;
     this.customer = customer;
     this.event = event;
@@ -47,11 +51,11 @@ public class TicketEntity {
     this.reservedAt = reservedAt;
   }
 
-  public Long getId() {
+  public String getId() {
     return this.id;
   }
 
-  public void setId(final Long id) {
+  public void setId(final String id) {
     this.id = id;
   }
 

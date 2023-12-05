@@ -1,21 +1,17 @@
 package br.com.fullcycle.hexagonal.infrastructure.jpa.entities;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 import java.util.Objects;
-
-import static jakarta.persistence.GenerationType.IDENTITY;
 
 @Entity
 @Table(name = "customers")
 public class CustomerEntity {
 
   @Id
-  @GeneratedValue(strategy = IDENTITY)
-  private Long id;
+  private String id;
 
   private String name;
 
@@ -26,18 +22,18 @@ public class CustomerEntity {
   public CustomerEntity() {
   }
 
-  public CustomerEntity(final Long id, final String name, final String cpf, final String email) {
+  public CustomerEntity(final String id, final String name, final String cpf, final String email) {
     this.id = id;
     this.name = name;
     this.cpf = cpf;
     this.email = email;
   }
 
-  public Long getId() {
+  public String getId() {
     return this.id;
   }
 
-  public void setId(final Long id) {
+  public void setId(final String id) {
     this.id = id;
   }
 

@@ -5,7 +5,7 @@ import br.com.fullcycle.hexagonal.application.exceptions.ValidationException;
 import br.com.fullcycle.hexagonal.infrastructure.jpa.entities.CustomerEntity;
 import br.com.fullcycle.hexagonal.infrastructure.jpa.entities.EventEntity;
 import br.com.fullcycle.hexagonal.infrastructure.jpa.entities.TicketEntity;
-import br.com.fullcycle.hexagonal.infrastructure.jpa.entities.TicketStatus;
+import br.com.fullcycle.hexagonal.application.domain.ticket.TicketStatus;
 import br.com.fullcycle.hexagonal.infrastructure.jpa.repositories.CustomerJpaRepository;
 import br.com.fullcycle.hexagonal.infrastructure.jpa.repositories.EventJpaRepository;
 import br.com.fullcycle.hexagonal.infrastructure.jpa.repositories.TicketJpaRepository;

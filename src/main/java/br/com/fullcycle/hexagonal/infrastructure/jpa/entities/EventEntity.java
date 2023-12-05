@@ -3,7 +3,6 @@ package br.com.fullcycle.hexagonal.infrastructure.jpa.entities;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
@@ -14,15 +13,12 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-import static jakarta.persistence.GenerationType.IDENTITY;
-
 @Entity
 @Table(name = "events")
 public class EventEntity {
 
   @Id
-  @GeneratedValue(strategy = IDENTITY)
-  private Long id;
+  private String id;
 
   private String name;
 
@@ -40,7 +36,7 @@ public class EventEntity {
     this.tickets = new HashSet<>();
   }
 
-  public EventEntity(final Long id, final String name, final LocalDate date, final int totalSpots, final Set<TicketEntity> tickets) {
+  public EventEntity(final String id, final String name, final LocalDate date, final int totalSpots, final Set<TicketEntity> tickets) {
     this.id = id;
     this.name = name;
     this.date = date;
@@ -48,11 +44,11 @@ public class EventEntity {
     this.tickets = tickets != null ? tickets : new HashSet<>();
   }
 
-  public Long getId() {
+  public String getId() {
     return this.id;
   }
 
-  public void setId(final Long id) {
+  public void setId(final String id) {
     this.id = id;
   }
 
