@@ -1,7 +1,7 @@
 package br.com.fullcycle.hexagonal.infrastructure.services;
 
-import br.com.fullcycle.hexagonal.infrastructure.models.Partner;
-import br.com.fullcycle.hexagonal.infrastructure.repositories.PartnerRepository;
+import br.com.fullcycle.hexagonal.infrastructure.jpa.entities.PartnerEntity;
+import br.com.fullcycle.hexagonal.infrastructure.jpa.repositories.PartnerJpaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,22 +12,22 @@ import java.util.Optional;
 public class PartnerService {
 
   @Autowired
-  private PartnerRepository repository;
+  private PartnerJpaRepository repository;
 
   @Transactional
-  public Partner save(final Partner customer) {
+  public PartnerEntity save(final PartnerEntity customer) {
     return this.repository.save(customer);
   }
 
-  public Optional<Partner> findById(final Long id) {
+  public Optional<PartnerEntity> findById(final Long id) {
     return this.repository.findById(id);
   }
 
-  public Optional<Partner> findByCnpj(final String cnpj) {
+  public Optional<PartnerEntity> findByCnpj(final String cnpj) {
     return this.repository.findByCnpj(cnpj);
   }
 
-  public Optional<Partner> findByEmail(final String email) {
+  public Optional<PartnerEntity> findByEmail(final String email) {
     return this.repository.findByEmail(email);
   }
 

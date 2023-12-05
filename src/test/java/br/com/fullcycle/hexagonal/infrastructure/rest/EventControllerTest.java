@@ -1,13 +1,13 @@
 package br.com.fullcycle.hexagonal.infrastructure.rest;
 
-import br.com.fullcycle.hexagonal.application.usecases.CreateEventUseCase;
+import br.com.fullcycle.hexagonal.application.usecases.event.CreateEventUseCase;
 import br.com.fullcycle.hexagonal.infrastructure.dtos.NewEventDTO;
 import br.com.fullcycle.hexagonal.infrastructure.dtos.SubscribeDTO;
-import br.com.fullcycle.hexagonal.infrastructure.models.Customer;
-import br.com.fullcycle.hexagonal.infrastructure.models.Partner;
-import br.com.fullcycle.hexagonal.infrastructure.repositories.CustomerRepository;
-import br.com.fullcycle.hexagonal.infrastructure.repositories.EventRepository;
-import br.com.fullcycle.hexagonal.infrastructure.repositories.PartnerRepository;
+import br.com.fullcycle.hexagonal.infrastructure.jpa.entities.CustomerEntity;
+import br.com.fullcycle.hexagonal.infrastructure.jpa.entities.PartnerEntity;
+import br.com.fullcycle.hexagonal.infrastructure.jpa.repositories.CustomerJpaRepository;
+import br.com.fullcycle.hexagonal.infrastructure.jpa.repositories.EventJpaRepository;
+import br.com.fullcycle.hexagonal.infrastructure.jpa.repositories.PartnerJpaRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -36,23 +36,23 @@ class EventControllerTest {
   private ObjectMapper mapper;
 
   @Autowired
-  private CustomerRepository customerRepository;
+  private CustomerJpaRepository customerRepository;
 
   @Autowired
-  private PartnerRepository partnerRepository;
+  private PartnerJpaRepository partnerRepository;
 
   @Autowired
-  private EventRepository eventRepository;
+  private EventJpaRepository eventRepository;
 
-  private Customer johnDoe;
+  private CustomerEntity johnDoe;
 
-  private Partner disney;
+  private PartnerEntity disney;
 
   @Test
   @DisplayName("Deve criar um evento")
   public void testCreate() throws Exception {
 
-    final var event = new NewEventDTO("Disney on Ice", "2021-01-01", 100, this.disney.getId());
+    final var event = new NewEventDTO("Disney on Ice", "2021-01-01", 100, null);
 
     final var result = this.mvc.perform(
         MockMvcRequestBuilders.post("/events")
@@ -78,7 +78,7 @@ class EventControllerTest {
       "Disney on Ice",
       "2021-01-01",
       100,
-      this.disney.getId()
+      null
     );
 
     final var createResult = this.mvc.perform(
@@ -92,7 +92,7 @@ class EventControllerTest {
 
     final var eventId = this.mapper.readValue(createResult, CreateEventUseCase.Output.class).id();
 
-    final var subscribeDTO = new SubscribeDTO(this.johnDoe.getId(), null);
+    final var subscribeDTO = new SubscribeDTO(this.johnDoe.getId().toString(), null);
 
     this.mvc.perform(
         MockMvcRequestBuilders.post("/events/{id}/subscribe", eventId)
@@ -102,14 +102,14 @@ class EventControllerTest {
       .andExpect(MockMvcResultMatchers.status().isOk())
       .andReturn().getResponse().getContentAsByteArray();
 
-    final var actualEvent = this.eventRepository.findById(eventId).get();
+    final var actualEvent = this.eventRepository.findById(null).get();
     Assertions.assertEquals(1, actualEvent.getTickets().size());
   }
 
   @BeforeEach
   void setUp() {
-    this.johnDoe = this.customerRepository.save(new Customer(null, "John Doe", "123", "john@gmail.com"));
-    this.disney = this.partnerRepository.save(new Partner(null, "Disney", "456", "disney@gmail.com"));
+    this.johnDoe = this.customerRepository.save(new CustomerEntity(null, "John Doe", "123", "john@gmail.com"));
+    this.disney = this.partnerRepository.save(new PartnerEntity(null, "Disney", "456", "disney@gmail.com"));
   }
 
   @AfterEach
