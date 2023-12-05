@@ -1,8 +1,8 @@
 package br.com.fullcycle.hexagonal.application.domain.partner;
 
+import br.com.fullcycle.hexagonal.application.domain.Entities;
 import br.com.fullcycle.hexagonal.application.domain.person.Cnpj;
 import br.com.fullcycle.hexagonal.application.domain.person.Email;
-import br.com.fullcycle.hexagonal.application.domain.Entities;
 import br.com.fullcycle.hexagonal.application.domain.person.Name;
 
 public class Partner {
@@ -40,6 +40,19 @@ public class Partner {
 
   public Email email() {
     return this.email;
+  }
+
+  @Override
+  public int hashCode() {
+    return this.partnerId.hashCode();
+  }
+
+  @Override
+  public boolean equals(final Object o) {
+    if (this == o) return true;
+    if (!(o instanceof final Partner partner)) return false;
+
+    return this.partnerId.equals(partner.partnerId);
   }
 
 }

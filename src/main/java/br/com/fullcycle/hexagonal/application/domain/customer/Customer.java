@@ -1,8 +1,8 @@
 package br.com.fullcycle.hexagonal.application.domain.customer;
 
+import br.com.fullcycle.hexagonal.application.domain.Entities;
 import br.com.fullcycle.hexagonal.application.domain.person.Cpf;
 import br.com.fullcycle.hexagonal.application.domain.person.Email;
-import br.com.fullcycle.hexagonal.application.domain.Entities;
 import br.com.fullcycle.hexagonal.application.domain.person.Name;
 
 public class Customer {
@@ -40,6 +40,19 @@ public class Customer {
 
   public Email email() {
     return this.email;
+  }
+
+  @Override
+  public int hashCode() {
+    return this.customerId.hashCode();
+  }
+
+  @Override
+  public boolean equals(final Object o) {
+    if (this == o) return true;
+    if (!(o instanceof final Customer customer)) return false;
+
+    return this.customerId.equals(customer.customerId);
   }
 
 }

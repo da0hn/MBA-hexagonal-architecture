@@ -95,4 +95,17 @@ public class Event {
     return ticket;
   }
 
+  @Override
+  public int hashCode() {
+    return this.eventId.hashCode();
+  }
+
+  @Override
+  public boolean equals(final Object o) {
+    if (this == o) return true;
+    if (!(o instanceof final Event event)) return false;
+
+    return this.eventId.equals(event.eventId);
+  }
+
 }

@@ -1,9 +1,8 @@
 package br.com.fullcycle.hexagonal.application.domain.ticket;
 
-import br.com.fullcycle.hexagonal.application.domain.customer.CustomerId;
 import br.com.fullcycle.hexagonal.application.domain.Entities;
+import br.com.fullcycle.hexagonal.application.domain.customer.CustomerId;
 import br.com.fullcycle.hexagonal.application.domain.event.EventId;
-import br.com.fullcycle.hexagonal.infrastructure.jpa.entities.TicketStatus;
 
 import java.time.Instant;
 
@@ -73,6 +72,19 @@ public class Ticket {
 
   public Instant reservedAt() {
     return this.reservedAt;
+  }
+
+  @Override
+  public int hashCode() {
+    return this.ticketId.hashCode();
+  }
+
+  @Override
+  public boolean equals(final Object o) {
+    if (this == o) return true;
+    if (!(o instanceof final Ticket ticket)) return false;
+
+    return this.ticketId.equals(ticket.ticketId);
   }
 
 }
