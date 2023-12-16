@@ -7,6 +7,7 @@ import br.com.fullcycle.infrastructure.dtos.PartnerDTO;
 import br.com.fullcycle.infrastructure.http.HttpRouter;
 import br.com.fullcycle.infrastructure.http.HttpRouter.HttpRequest;
 import br.com.fullcycle.infrastructure.http.HttpRouter.HttpResponse;
+import org.springframework.stereotype.Component;
 
 import java.net.URI;
 
@@ -26,13 +27,13 @@ public class PartnerController {
     this.getPartnerByIdUseCase = getPartnerByIdUseCase;
   }
 
-  public HttpRouter bind(HttpRouter httpRouter) {
+  public HttpRouter bind(final HttpRouter httpRouter) {
     httpRouter.GET("/partners/{id}", this::get);
     httpRouter.POST("/partners", this::create);
     return httpRouter;
   }
 
-  public HttpResponse<?> create(final HttpRequest request) {
+  private HttpResponse<?> create(final HttpRequest request) {
     try {
       final var dto = request.body(PartnerDTO.class);
       final var output = this.createPartnerUseCase.execute(new Input(
@@ -47,7 +48,7 @@ public class PartnerController {
     }
   }
 
-  public HttpResponse<?> get(final HttpRequest request) {
+  private HttpResponse<?> get(final HttpRequest request) {
     final var id = request.pathParameter("id");
     return this.getPartnerByIdUseCase.execute(new GetPartnerByIdUseCase.Input(id))
       .map(HttpResponse::ok)

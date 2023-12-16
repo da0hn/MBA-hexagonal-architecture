@@ -2,6 +2,7 @@ package br.com.fullcycle.infrastructure.http;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.servlet.function.HandlerFunction;
 import org.springframework.web.servlet.function.RouterFunctions;
 import org.springframework.web.servlet.function.ServerRequest;
 import org.springframework.web.servlet.function.ServerResponse;
@@ -24,8 +25,18 @@ public class SpringHttpRouter implements HttpRouter {
 
   @Override
   public <T> HttpRouter POST(final String pattern, final HttpHandler<T> handler) {
+    this.router.POST(pattern, wrapHandler(pattern, handler));
+    return this;
+  }
 
-    this.router.POST(pattern, serverRequest -> {
+  @Override
+  public <T> HttpRouter GET(final String pattern, final HttpHandler<T> handler) {
+    this.router.GET(pattern, wrapHandler(pattern, handler));
+    return this;
+  }
+
+  private static <T> HandlerFunction<ServerResponse> wrapHandler(final String pattern, final HttpHandler<T> handler) {
+    return serverRequest -> {
       try {
         final var request = new SpringHttpRequest(serverRequest);
         final var response = handler.handle(request);
@@ -37,14 +48,7 @@ public class SpringHttpRouter implements HttpRouter {
         log.error("Unexpected error was observed at %s".formatted(pattern), e);
         return ServerResponse.status(500).body("Unexpected error was observed");
       }
-    });
-
-    return this;
-  }
-
-  @Override
-  public <T> HttpRouter GET(final String pattern, final HttpHandler<T> handler) {
-    return null;
+    };
   }
 
   public record SpringHttpRequest(ServerRequest request) implements HttpRequest {
