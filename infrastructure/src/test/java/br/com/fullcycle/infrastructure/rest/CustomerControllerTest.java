@@ -1,6 +1,5 @@
 package br.com.fullcycle.infrastructure.rest;
 
-
 import br.com.fullcycle.application.customer.CreateCustomerUseCase;
 import br.com.fullcycle.application.customer.GetCustomerByIdUseCase;
 import br.com.fullcycle.domain.customer.CustomerRepository;
@@ -139,6 +138,31 @@ public class CustomerControllerTest {
     Assertions.assertEquals(customer.name(), actualResponse.name());
     Assertions.assertEquals(customer.cpf(), actualResponse.cpf());
     Assertions.assertEquals(customer.email(), actualResponse.email());
+  }
+
+  @Test
+  @DisplayName("Deve obter um cliente por id com X-Public")
+  public void testGetXPublic() throws Exception {
+
+    final var customer = new NewCustomerDTO("John Doe", "123.456.789-01", "john.doe@gmail.com");
+
+    final var createResult = this.mvc.perform(
+        MockMvcRequestBuilders.post("/customers")
+          .contentType(MediaType.APPLICATION_JSON)
+          .content(this.mapper.writeValueAsString(customer))
+      )
+      .andReturn().getResponse().getContentAsByteArray();
+
+    final var customerId = this.mapper.readValue(createResult, CreateCustomerUseCase.Output.class).id();
+
+    final var result = this.mvc.perform(
+        MockMvcRequestBuilders.get("/customers/{id}", customerId)
+          .header("X-Public", true)
+      )
+      .andExpect(MockMvcResultMatchers.status().isOk())
+      .andReturn().getResponse().getContentAsByteArray();
+
+    Assertions.assertEquals(customerId, new String(result));
   }
 
   @AfterEach
