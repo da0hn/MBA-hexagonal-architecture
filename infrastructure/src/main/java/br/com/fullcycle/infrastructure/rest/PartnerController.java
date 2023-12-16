@@ -4,18 +4,14 @@ import br.com.fullcycle.application.partner.CreatePartnerUseCase;
 import br.com.fullcycle.application.partner.GetPartnerByIdUseCase;
 import br.com.fullcycle.domain.exceptions.ValidationException;
 import br.com.fullcycle.infrastructure.dtos.PartnerDTO;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import br.com.fullcycle.infrastructure.http.HttpRouter;
+import br.com.fullcycle.infrastructure.http.HttpRouter.HttpRequest;
+import br.com.fullcycle.infrastructure.http.HttpRouter.HttpResponse;
 
 import java.net.URI;
 
-@RestController
-@RequestMapping("/partners")
+import static br.com.fullcycle.application.partner.CreatePartnerUseCase.Input;
+
 public class PartnerController {
 
   private final CreatePartnerUseCase createPartnerUseCase;
@@ -30,26 +26,32 @@ public class PartnerController {
     this.getPartnerByIdUseCase = getPartnerByIdUseCase;
   }
 
-  @PostMapping
-  public ResponseEntity<?> create(@RequestBody final PartnerDTO dto) {
+  public HttpRouter bind(HttpRouter httpRouter) {
+    httpRouter.GET("/partners/{id}", this::get);
+    httpRouter.POST("/partners", this::create);
+    return httpRouter;
+  }
+
+  public HttpResponse<?> create(final HttpRequest request) {
     try {
-      final var output = this.createPartnerUseCase.execute(new CreatePartnerUseCase.Input(
+      final var dto = request.body(PartnerDTO.class);
+      final var output = this.createPartnerUseCase.execute(new Input(
         dto.getCnpj(),
         dto.getEmail(),
         dto.getName()
       ));
-      return ResponseEntity.created(URI.create("/partners/" + output.id())).body(output);
+      return HttpResponse.created(URI.create("/partners/" + output.id())).body(output);
     }
     catch (final ValidationException e) {
-      return ResponseEntity.unprocessableEntity().body(e.getMessage());
+      return HttpResponse.unprocessableEntity().body(e.getMessage());
     }
   }
 
-  @GetMapping("/{id}")
-  public ResponseEntity<?> get(@PathVariable final String id) {
+  public HttpResponse<?> get(final HttpRequest request) {
+    final var id = request.pathParameter("id");
     return this.getPartnerByIdUseCase.execute(new GetPartnerByIdUseCase.Input(id))
-      .map(ResponseEntity::ok)
-      .orElseGet(ResponseEntity.notFound()::build);
+      .map(HttpResponse::ok)
+      .orElseGet(HttpResponse.notFound()::build);
   }
 
 }
