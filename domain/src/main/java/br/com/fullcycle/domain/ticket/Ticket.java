@@ -1,10 +1,15 @@
 package br.com.fullcycle.domain.ticket;
 
+import br.com.fullcycle.domain.DomainEvent;
 import br.com.fullcycle.domain.Entities;
 import br.com.fullcycle.domain.customer.CustomerId;
 import br.com.fullcycle.domain.event.EventId;
+import br.com.fullcycle.domain.event.EventTicketId;
 
 import java.time.Instant;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Ticket {
 
@@ -20,6 +25,8 @@ public class Ticket {
 
   private final Instant reservedAt;
 
+  private final Set<DomainEvent> domainEvents;
+
   public Ticket(
     final TicketId ticketId,
     final CustomerId customerId,
@@ -34,6 +41,7 @@ public class Ticket {
     this.status = Entities.requireNonNull(status, "Ticket status must not be null");
     this.reservedAt = Entities.requireNonNull(reservedAt, "Ticket reserved at must not be null");
     this.paidAt = paidAt;
+    this.domainEvents = new HashSet<>();
   }
 
   public static Ticket newTicket(
@@ -48,6 +56,16 @@ public class Ticket {
       null,
       Instant.now()
     );
+  }
+
+  public static Ticket newTicket(
+    final EventTicketId eventTicketId,
+    final CustomerId customerId,
+    final EventId eventId
+  ) {
+    final var ticket = newTicket(customerId, eventId);
+    ticket.domainEvents.add(new TicketCreated(eventTicketId, ticket.ticketId, eventId, customerId));
+    return ticket;
   }
 
   public TicketId ticketId() {
@@ -72,6 +90,10 @@ public class Ticket {
 
   public Instant reservedAt() {
     return this.reservedAt;
+  }
+
+  public Set<DomainEvent> domainEvents() {
+    return Collections.unmodifiableSet(this.domainEvents);
   }
 
   @Override

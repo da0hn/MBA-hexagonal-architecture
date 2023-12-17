@@ -16,7 +16,7 @@ public class OutboxEntity {
   @Id
   private UUID id;
 
-  @Column(name = "content", length = 4000)
+  @Column(name = "content", length = 4_000, columnDefinition = "JSON")
   private String content;
 
   @Column(name = "is_published")
@@ -74,6 +74,11 @@ public class OutboxEntity {
     if (!(o instanceof final OutboxEntity that)) return false;
 
     return this.id.equals(that.id);
+  }
+
+  public OutboxEntity notePublished() {
+    this.published = true;
+    return this;
   }
 
 }

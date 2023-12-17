@@ -12,6 +12,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 import java.time.Instant;
+import java.util.HashSet;
 import java.util.UUID;
 
 @Entity(name = "Ticket")
