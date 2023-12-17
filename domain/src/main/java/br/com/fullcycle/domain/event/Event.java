@@ -1,12 +1,12 @@
 package br.com.fullcycle.domain.event;
 
+import br.com.fullcycle.domain.DomainEvent;
 import br.com.fullcycle.domain.Entities;
 import br.com.fullcycle.domain.customer.CustomerId;
 import br.com.fullcycle.domain.exceptions.ValidationException;
 import br.com.fullcycle.domain.partner.Partner;
 import br.com.fullcycle.domain.partner.PartnerId;
 import br.com.fullcycle.domain.person.Name;
-import br.com.fullcycle.domain.ticket.Ticket;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -21,6 +21,8 @@ public class Event {
   private final EventId eventId;
 
   private final Set<EventTicket> tickets;
+
+  private final Set<DomainEvent> domainEvents;
 
   private Name name;
 
@@ -48,6 +50,7 @@ public class Event {
   private Event(final EventId eventId, final Collection<EventTicket> tickets) {
     this.eventId = Entities.requireNonNull(eventId, "Event id must not be null");
     this.tickets = tickets == null ? new HashSet<>(0) : new HashSet<>(tickets);
+    this.domainEvents = new HashSet<>(0);
   }
 
   public static Event newEvent(final String name, final CharSequence date, final Integer totalSpots, final Partner partner) {
@@ -85,6 +88,10 @@ public class Event {
     return Collections.unmodifiableSet(this.tickets);
   }
 
+  public Set<DomainEvent> domainEvents() {
+    return Collections.unmodifiableSet(this.domainEvents);
+  }
+
   public Name name() {
     return this.name;
   }
@@ -105,7 +112,7 @@ public class Event {
     return this.eventId;
   }
 
-  public Ticket reserveTicket(final CustomerId customerId) {
+  public EventTicket reserveTicket(final CustomerId customerId) {
 
     this.tickets().stream()
       .filter(it -> it.customerId().equals(customerId))
@@ -117,10 +124,10 @@ public class Event {
     if (this.totalSpots < this.tickets.size() + 1) {
       throw new ValidationException("Event sold out");
     }
-
-    final var ticket = Ticket.newTicket(customerId, this.eventId);
-    this.tickets.add(new EventTicket(ticket.ticketId(), this.eventId, customerId, this.tickets.size() + 1));
-    return ticket;
+    final var eventTicket = EventTicket.newTicket(this.eventId, customerId, this.tickets.size() + 1);
+    this.tickets.add(eventTicket);
+    this.domainEvents.add(new EventTicketReserved(eventTicket.eventTicketId(), this.eventId, customerId));
+    return eventTicket;
   }
 
   @Override

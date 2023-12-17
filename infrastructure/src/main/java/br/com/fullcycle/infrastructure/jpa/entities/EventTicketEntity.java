@@ -3,6 +3,7 @@ package br.com.fullcycle.infrastructure.jpa.entities;
 import br.com.fullcycle.domain.customer.CustomerId;
 import br.com.fullcycle.domain.event.EventId;
 import br.com.fullcycle.domain.event.EventTicket;
+import br.com.fullcycle.domain.event.EventTicketId;
 import br.com.fullcycle.domain.ticket.TicketId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -10,6 +11,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Entity(name = "EventTicket")
@@ -17,6 +19,8 @@ import java.util.UUID;
 public class EventTicketEntity {
 
   @Id
+  private UUID eventTicketId;
+
   private UUID ticketId;
 
   private UUID customerId;
@@ -29,20 +33,36 @@ public class EventTicketEntity {
   public EventTicketEntity() {
   }
 
-  public EventTicketEntity(final UUID ticketId, final UUID customerId, final Integer ordering, final EventEntity event) {
-    this.ticketId = ticketId;
+  public EventTicketEntity(
+    final UUID eventTicketId,
+    final UUID customerId,
+    final UUID ticketId,
+    final Integer ordering,
+    final EventEntity event
+  ) {
+    this.eventTicketId = eventTicketId;
     this.customerId = customerId;
+    this.ticketId = ticketId;
     this.ordering = ordering;
     this.event = event;
   }
 
   public static EventTicketEntity of(final EventEntity event, final EventTicket eventTicket) {
     return new EventTicketEntity(
-      eventTicket.ticketId().value(),
+      eventTicket.eventTicketId().value(),
       eventTicket.customerId().value(),
+      Optional.ofNullable(eventTicket.ticketId()).map(TicketId::value).orElse(null),
       eventTicket.ordering(),
       event
     );
+  }
+
+  public UUID getEventTicketId() {
+    return this.eventTicketId;
+  }
+
+  public void setEventTicketId(final UUID eventTicketId) {
+    this.eventTicketId = eventTicketId;
   }
 
   public UUID getTicketId() {
@@ -78,28 +98,22 @@ public class EventTicketEntity {
   }
 
   @Override
-  public int hashCode() {
-    int result = this.ticketId.hashCode();
-    result = 31 * result + this.customerId.hashCode();
-    result = 31 * result + this.ordering.hashCode();
-    result = 31 * result + this.event.hashCode();
-    return result;
+  public boolean equals(final Object o) {
+    if (this == o) return true;
+    if (!(o instanceof EventTicketEntity that)) return false;
+
+    return this.eventTicketId.equals(that.eventTicketId);
   }
 
   @Override
-  public boolean equals(final Object o) {
-    if (this == o) return true;
-    if (!(o instanceof final EventTicketEntity that)) return false;
-
-    if (!this.ticketId.equals(that.ticketId)) return false;
-    if (!this.customerId.equals(that.customerId)) return false;
-    if (!this.ordering.equals(that.ordering)) return false;
-    return this.event.equals(that.event);
+  public int hashCode() {
+    return this.eventTicketId.hashCode();
   }
 
   public EventTicket toEventTicket() {
     return new EventTicket(
-      new TicketId(this.ticketId),
+      new EventTicketId(this.eventTicketId),
+      Optional.ofNullable(this.ticketId).map(TicketId::new).orElse(null),
       new EventId(this.event.getId()),
       new CustomerId(this.customerId),
       this.ordering

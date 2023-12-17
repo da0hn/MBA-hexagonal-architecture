@@ -78,8 +78,8 @@ class SubscribeCustomerToEventUseCaseIT extends IntegrationTest {
     final var output = this.subscribeCustomerToEventUseCase.execute(input);
 
     Assertions.assertThat(output.eventId()).isNotNull();
+    Assertions.assertThat(output.eventTicketId()).isNotNull();
     Assertions.assertThat(output.reservedAt()).isNotNull();
-    Assertions.assertThat(output.ticketStatus()).isEqualTo(TicketStatus.PENDING.name());
   }
 
   @Test
@@ -127,8 +127,7 @@ class SubscribeCustomerToEventUseCaseIT extends IntegrationTest {
     final var customerId = customer.customerId().asString();
     final var eventId = event.eventId().asString();
 
-    final var ticket = event.reserveTicket(customer.customerId());
-    this.ticketRepository.create(ticket);
+    event.reserveTicket(customer.customerId());
     this.eventRepository.update(event);
 
     final var input = new SubscribeCustomerToEventUseCase.Input(eventId, customerId);
@@ -152,8 +151,7 @@ class SubscribeCustomerToEventUseCaseIT extends IntegrationTest {
     final var customerId = customer.customerId().asString();
     final var eventId = event.eventId().asString();
 
-    final var ticket = event.reserveTicket(otherCustomer.customerId());
-    this.ticketRepository.create(ticket);
+    event.reserveTicket(otherCustomer.customerId());
     this.eventRepository.update(event);
 
     final var input = new SubscribeCustomerToEventUseCase.Input(eventId, customerId);

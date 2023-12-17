@@ -46,7 +46,6 @@ public class EventController {
     }
   }
 
-  @Transactional
   @PostMapping(value = "/{id}/subscribe")
   public ResponseEntity<?> subscribe(@PathVariable final String id, @RequestBody final SubscribeDTO dto) {
     try {

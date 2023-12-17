@@ -40,15 +40,14 @@ public class SubscribeCustomerToEventUseCase
 
     final var ticket = event.reserveTicket(customer.customerId());
 
-    this.ticketRepository.create(ticket);
     this.eventRepository.update(event);
 
-    return new Output(event.eventId().asString(), ticket.ticketId().asString(), ticket.status().name(), ticket.reservedAt());
+    return new Output(event.eventId().asString(), ticket.eventTicketId().asString(), Instant.now());
 
   }
 
   public record Input(String eventId, String customerId) { }
 
-  public record Output(String eventId, String ticketId, String ticketStatus, Instant reservedAt) { }
+  public record Output(String eventId, String eventTicketId, Instant reservedAt) { }
 
 }

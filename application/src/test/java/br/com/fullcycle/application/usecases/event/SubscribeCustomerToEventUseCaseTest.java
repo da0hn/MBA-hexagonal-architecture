@@ -48,8 +48,8 @@ class SubscribeCustomerToEventUseCaseTest {
     final var output = subscribeCustomerToEventUseCase.execute(input);
 
     Assertions.assertThat(output.eventId()).isNotNull();
+    Assertions.assertThat(output.eventTicketId()).isNotNull();
     Assertions.assertThat(output.reservedAt()).isNotNull();
-    Assertions.assertThat(output.ticketStatus()).isEqualTo(TicketStatus.PENDING.name());
   }
 
   @Test
@@ -131,9 +131,8 @@ class SubscribeCustomerToEventUseCaseTest {
       partner
     );
 
-    final var ticket = event.reserveTicket(customer.customerId());
+    event.reserveTicket(customer.customerId());
 
-    ticketRepository.create(ticket);
     eventRepository.create(event);
     customerRepository.create(customer);
 
@@ -169,9 +168,8 @@ class SubscribeCustomerToEventUseCaseTest {
       partner
     );
 
-    final var ticket = event.reserveTicket(otherCustomer.customerId());
+    event.reserveTicket(otherCustomer.customerId());
 
-    ticketRepository.create(ticket);
     eventRepository.create(event);
     customerRepository.create(customer);
 

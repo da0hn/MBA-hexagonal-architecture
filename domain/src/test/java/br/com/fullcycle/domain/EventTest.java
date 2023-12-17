@@ -2,6 +2,7 @@ package br.com.fullcycle.domain;
 
 import br.com.fullcycle.domain.customer.Customer;
 import br.com.fullcycle.domain.event.Event;
+import br.com.fullcycle.domain.event.EventTicket;
 import br.com.fullcycle.domain.exceptions.ValidationException;
 import br.com.fullcycle.domain.partner.Partner;
 import br.com.fullcycle.domain.ticket.TicketStatus;
@@ -96,7 +97,7 @@ public class EventTest {
     final var expectedEventId = event.eventId();
     final var expectedPartnerId = partner.partnerId();
 
-    final var ticket = event.reserveTicket(expectedCustomerId);
+    final var eventTicket = event.reserveTicket(expectedCustomerId);
 
     Assertions.assertThat(event.eventId()).isNotNull();
     Assertions.assertThat(event.name().value()).isEqualTo(expectedName);
@@ -105,18 +106,20 @@ public class EventTest {
     Assertions.assertThat(event.partnerId()).isEqualTo(expectedPartnerId);
     Assertions.assertThat(event.tickets()).hasSize(expectedTickets);
 
-    Assertions.assertThat(ticket.ticketId()).isNotNull();
-    Assertions.assertThat(ticket.customerId()).isEqualTo(expectedCustomerId);
-    Assertions.assertThat(ticket.eventId()).isEqualTo(expectedEventId);
-    Assertions.assertThat(ticket.status()).isEqualTo(TicketStatus.PENDING);
-    Assertions.assertThat(ticket.reservedAt()).isNotNull();
-    Assertions.assertThat(ticket.paidAt()).isNull();
+    Assertions.assertThat(eventTicket.eventTicketId()).isNotNull();
+    Assertions.assertThat(eventTicket.eventId()).isEqualTo(expectedEventId);
+    Assertions.assertThat(eventTicket.customerId()).isEqualTo(expectedCustomerId);
+    Assertions.assertThat(eventTicket.ticketId()).isNull();
+    Assertions.assertThat(eventTicket.ordering()).isNotNull();
 
     final var actualEventTicket = event.tickets().iterator().next();
     Assertions.assertThat(actualEventTicket.eventId()).isEqualTo(expectedEventId);
     Assertions.assertThat(actualEventTicket.customerId()).isEqualTo(expectedCustomerId);
-    Assertions.assertThat(actualEventTicket.ticketId()).isEqualTo(ticket.ticketId());
+    Assertions.assertThat(actualEventTicket.eventTicketId()).isEqualTo(eventTicket.eventTicketId());
     Assertions.assertThat(actualEventTicket.ordering()).isEqualTo(expectedTickets);
+
+    final var actualDomainEvents = event.domainEvents().iterator().next();
+    Assertions.assertThat(actualDomainEvents.type()).isEqualTo("event-ticket-reserved");
   }
 
   @Test
